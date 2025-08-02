@@ -3,9 +3,11 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TelegrafModule } from 'nestjs-telegraf';
 import { BotService } from './bot.service';
 import { BotUpdate } from './bot.update';
+import { LoggerModule } from './utils/logger/logger.module';
 
 @Module({
   imports: [
+    LoggerModule,
     TelegrafModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
