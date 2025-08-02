@@ -11,6 +11,7 @@ export class UniversalLogger {
     [LogLevel.WARN]: '\x1b[33m', // Желтый
     [LogLevel.ERROR]: '\x1b[31m', // Красный
     [LogLevel.FATAL]: '\x1b[35m', // Пурпурный
+    [LogLevel.VERBOSE]: '\x1b[90m', // Серый
     reset: '\x1b[0m',
   };
 
@@ -21,6 +22,7 @@ export class UniversalLogger {
     [LogLevel.WARN]: 'WARN',
     [LogLevel.ERROR]: 'ERROR',
     [LogLevel.FATAL]: 'FATAL',
+    [LogLevel.VERBOSE]: 'VERBOSE',
   };
 
   private logFileStream?: fs.WriteStream;
@@ -150,6 +152,7 @@ export class UniversalLogger {
         [LogLevel.WARN]: '⚠️',
         [LogLevel.ERROR]: '❌',
         [LogLevel.FATAL]: '💀',
+        [LogLevel.VERBOSE]: '🗣️',
       };
 
       const message =
@@ -247,6 +250,26 @@ export class UniversalLogger {
     metadata?: Record<string, any>,
   ): Promise<void> {
     return this.log(LogLevel.FATAL, message, context, metadata);
+  }
+
+  verbose(
+    message: string,
+    context?: string,
+    metadata?: Record<string, any>,
+  ): Promise<void> {
+    return this.log(LogLevel.VERBOSE, message, context, metadata);
+  }
+
+  raw(...args: any[]): void {
+    console.log(...args);
+    if (this.config.logToFile) {
+      const message = args
+        .map((arg) =>
+          typeof arg === 'object' ? JSON.stringify(arg, null, 2) : arg,
+        )
+        .join(' ');
+      this.writeToFile(message);
+    }
   }
 
   // Специальные методы для Telegram ботов

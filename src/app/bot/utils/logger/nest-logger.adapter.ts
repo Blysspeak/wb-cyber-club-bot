@@ -1,7 +1,10 @@
-import { LoggerService } from '@nestjs/common';
+import {
+  LoggerService as NestLoggerServiceInterface,
+  LogLevel as NestLogLevel,
+} from '@nestjs/common';
 import { UniversalLogger } from './logger';
 
-export class NestLoggerAdapter implements LoggerService {
+export class NestLoggerAdapter implements NestLoggerServiceInterface {
   constructor(private logger: UniversalLogger) {}
 
   log(message: any, context?: string): void {
@@ -21,6 +24,12 @@ export class NestLoggerAdapter implements LoggerService {
   }
 
   verbose(message: any, context?: string): void {
-    this.logger.trace(message, context);
+    this.logger.verbose(message, context);
   }
+
+  fatal(message: any, context?: string): void {
+    this.logger.fatal(message, context);
+  }
+
+  setLogLevels?(levels: NestLogLevel[]): void {}
 }

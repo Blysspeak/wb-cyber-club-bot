@@ -5,6 +5,7 @@ export enum LogLevel {
   WARN = 3,
   ERROR = 4,
   FATAL = 5,
+  VERBOSE = 6,
 }
 
 export interface LogEntry {
