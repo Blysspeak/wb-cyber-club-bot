@@ -12,7 +12,9 @@ export class BotUpdate {
 
   @Start()
   async start(@Ctx() ctx: Context) {
-    this.logger.info(`Bot started in chat ${ctx.chat.id}`);
+    if (ctx.chat) {
+      this.logger.info(`Bot started in chat ${ctx.chat.id}`);
+    }
     await ctx.reply('Welcome');
   }
 
