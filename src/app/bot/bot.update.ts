@@ -1,5 +1,6 @@
 import { Ctx, Help, Start, Update } from 'nestjs-telegraf';
 import { Context } from 'telegraf';
+import { SceneContext } from 'telegraf/scenes';
 import { UniversalLogger } from './utils/logger/logger';
 import { LoggerService } from './utils/logger/logger.service';
 
@@ -11,11 +12,11 @@ export class BotUpdate {
   }
 
   @Start()
-  async start(@Ctx() ctx: Context) {
+  async start(@Ctx() ctx: SceneContext) {
     if (ctx.chat) {
       this.logger.info(`Bot started in chat ${ctx.chat.id}`);
     }
-    await ctx.reply('Welcome');
+    await ctx.scene.enter('registration');
   }
 
   @Help()
