@@ -1,11 +1,11 @@
 import { Provider } from '@nestjs/common';
 import { UniversalLogger } from './logger';
-import { LogLevel } from './logger.types';
+import { BotLogger, LogLevel } from './logger.types';
 
 export const loggerProviders: Provider[] = [
   {
-    provide: 'UniversalLogger',
-    useFactory: () => {
+    provide: 'BotLogger',
+    useFactory: (): BotLogger => {
       return new UniversalLogger({
         level: LogLevel.TRACE,
         logToFile: true,

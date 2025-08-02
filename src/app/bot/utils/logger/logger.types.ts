@@ -1,3 +1,7 @@
+import { UniversalLogger } from './logger';
+
+export type BotLogger = UniversalLogger;
+
 export enum LogLevel {
   TRACE = 0,
   DEBUG = 1,
