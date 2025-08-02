@@ -3,20 +3,19 @@ import { getBotToken } from 'nestjs-telegraf';
 import { Telegraf } from 'telegraf';
 import { AppModule } from './app/app.module';
 import { LoggerService } from './app/bot/utils/logger/logger.service';
-import { NestLoggerAdapter } from './app/bot/utils/logger/nest-logger.adapter';
 import { PrismaService } from './app/database/prisma/prisma.service';
 import { RedisService } from './app/database/redis/redis.service';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     // Полностью отключаем стандартный логгер, чтобы избежать конфликтов типов
-    logger: false,
+    // logger: false,
   });
 
   const loggerService = app.get(LoggerService);
   const mainLogger = loggerService.getLogger('Main');
   // Устанавливаем наш кастомный логгер для всего приложения
-  app.useLogger(new NestLoggerAdapter(mainLogger));
+  // app.useLogger(new NestLoggerAdapter(mainLogger));
 
   const prismaService = app.get(PrismaService);
   const redisService = app.get(RedisService);

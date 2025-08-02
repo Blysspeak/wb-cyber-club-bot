@@ -4,7 +4,7 @@ import { UniversalLogger } from './logger';
 @Injectable()
 export class LoggerService {
   constructor(
-    @Inject('UniversalLogger')
+    @Inject('BotLogger')
     private readonly logger: UniversalLogger,
   ) {}
 

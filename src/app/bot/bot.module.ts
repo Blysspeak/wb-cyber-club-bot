@@ -4,6 +4,7 @@ import { TelegrafModule } from 'nestjs-telegraf';
 import { BotService } from './bot.service';
 import { BotUpdate } from './bot.update';
 import { LoggerModule } from './utils/logger/logger.module';
+import { RegistrationModule } from './modules/registration/registration.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { LoggerModule } from './utils/logger/logger.module';
       },
       inject: [ConfigService],
     }),
+    RegistrationModule,
   ],
   providers: [BotService, BotUpdate],
 })
