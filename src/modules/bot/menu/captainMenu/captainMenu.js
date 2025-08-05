@@ -1,5 +1,5 @@
 import { Markup } from 'telegraf'
-import { buttons } from './buttons.js'
+import { buttons } from '#buttons'
 
 export const getCaptainMenu = () => {
   const menu = [

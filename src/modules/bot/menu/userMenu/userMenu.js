@@ -1,5 +1,5 @@
+import { buttons } from '#buttons'
 import { Markup } from 'telegraf'
-import { buttons } from './buttons.js'
 
 export const getUserMenu = user => {
   const menu = [buttons.PROFILE, buttons.STATS]

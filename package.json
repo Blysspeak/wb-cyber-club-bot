@@ -5,7 +5,8 @@
     "dev": "nodemon --no-warnings src/main.js"
   },
   "imports": {
-    "#utils": "./src/modules/utils/index.js"
+    "#utils": "./src/modules/utils/index.js",
+    "#buttons": "./src/modules/bot/menu/buttons.js"
   },
   "dependencies": {
     "dotenv": "^17.2.1",
