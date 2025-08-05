@@ -1,5 +1,6 @@
 import { BOT_TOKEN, logger, messageLogger } from '#utils'
 import { Telegraf } from 'telegraf'
+import { MenuController } from './menu/menuController.js'
 
 class Bot {
   constructor(token) {
@@ -8,7 +9,7 @@ class Bot {
 
   init() {
     this.bot.use(messageLogger)
-    this.bot.start(ctx => ctx.reply('Welcome'))
+    this.bot.start(MenuController.sendMenu)
     this.handleErrors()
     this.handleSignals()
     logger.info('Bot initialized')
