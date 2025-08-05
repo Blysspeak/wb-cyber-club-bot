@@ -1,0 +1,21 @@
+{
+  "type": "module",
+  "scripts": {
+    "start": "node --no-warnings src/main.js",
+    "dev": "nodemon --no-warnings src/main.js"
+  },
+  "imports": {
+    "#utils": "./src/modules/utils/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "express": "^5.1.0",
+    "pino": "^9.7.0",
+    "pino-pretty": "^13.1.1",
+    "telegraf": "^4.16.3",
+    "zod": "^4.0.14"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
