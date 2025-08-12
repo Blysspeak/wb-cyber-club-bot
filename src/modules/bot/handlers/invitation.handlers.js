@@ -1,5 +1,6 @@
 import userService from '#userService'
 import redis from '#cache'
+import { MenuController } from '../menu/menuController.js'
 
 export const registerInvitationActions = bot => {
   bot.action(/^invite:(accept|decline):(\d+)$/, async ctx => {
@@ -14,6 +15,8 @@ export const registerInvitationActions = bot => {
         await ctx.answerCbQuery('Вы вступили в команду')
         await ctx.editMessageReplyMarkup({ inline_keyboard: [] }).catch(() => {})
         await ctx.editMessageText('✅ Вы приняли приглашение и вступили в команду').catch(() => {})
+        // Refresh main menu to reflect team membership
+        await MenuController.sendMenu(ctx)
       } else {
         await ctx.answerCbQuery('Вы отклонили приглашение')
         await ctx.editMessageReplyMarkup({ inline_keyboard: [] }).catch(() => {})

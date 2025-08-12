@@ -96,7 +96,7 @@ export const respondToInvitation = async (telegramId, invitationId, response) =>
   const user = await getUserByTelegramId(telegramId)
   if (!user) throw new Error('Пользователь не найден')
 
-  const invitation = await prisma.invitation.findUnique({ where: { id: invitationId }, include: { team: true } })
+  const invitation = await prisma.invitation.findUnique({ where: { id: invitationId }, include: { team: { include: { captain: { select: { telegramId: true } } } } } })
   if (!invitation) throw new Error('Приглашение не найдено')
   if (invitation.userId !== user.id) throw new Error('Приглашение адресовано другому пользователю')
   if (invitation.status !== 'PENDING') throw new Error('Приглашение уже обработано')
@@ -109,8 +109,12 @@ export const respondToInvitation = async (telegramId, invitationId, response) =>
 
   await Promise.all([
     cacheDel(['user', 'byTg', String(telegramId)]),
+    cacheDel(['user', 'stats', String(telegramId)]),
     cacheDel(['team', 'byUserTg', String(telegramId)]),
-    cacheDel(['team', 'infoText', String(telegramId)])
+    cacheDel(['team', 'infoText', String(telegramId)]),
+    // also invalidate captain's team caches
+    cacheDel(['team', 'byUserTg', String(invitation.team?.captain?.telegramId || '')]).catch(() => {}),
+    cacheDel(['team', 'infoText', String(invitation.team?.captain?.telegramId || '')]).catch(() => {})
   ])
 
   return { invitation: updatedInvitation, accepted: response === 'ACCEPTED' }

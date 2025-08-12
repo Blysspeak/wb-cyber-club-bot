@@ -57,4 +57,22 @@ export const onTeamManage = async ctx => MenuController.sendTeamManageMenu(ctx)
 export const onTeamSettings = async ctx => MenuController.sendTeamSettingsMenu(ctx)
 
 export const onTeamInvite = async ctx => ctx.scene.enter('invitePlayer')
-export const onTeamRemove = async ctx => ctx.scene.enter('removePlayer') 
+export const onTeamRemove = async ctx => ctx.scene.enter('removePlayer')
+
+export const onCreateTeam = async ctx => {
+  const user = await userService.getUserByTelegramId(ctx.from.id)
+  if (user?.teamId) {
+    await ctx.reply('Вы уже состоите в команде. Создание команды недоступно.')
+    return MenuController.sendTeamOverviewMenu(ctx)
+  }
+  return ctx.scene.enter('createTeam')
+}
+
+export const onJoinTeamGuarded = async ctx => {
+  const user = await userService.getUserByTelegramId(ctx.from.id)
+  if (user?.teamId) {
+    await ctx.reply('Вы уже состоите в команде. Сначала покиньте текущую команду.')
+    return MenuController.sendTeamOverviewMenu(ctx)
+  }
+  return ctx.reply('Вступление в команду — скоро')
+} 

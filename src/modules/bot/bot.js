@@ -2,7 +2,7 @@ import { createBot } from './botInit.js'
 import { MenuController } from './menu/menuController.js'
 import { buttons } from '#buttons'
 import { onProfile, onStats } from './handlers/profile.handlers.js'
-import { onMyTeam, onTeamOverview, onTeamManage, onTeamSettings, sendTeamRosterRich } from './handlers/team.handlers.js'
+import { onMyTeam, onTeamOverview, onTeamManage, onTeamSettings, sendTeamRosterRich, onCreateTeam, onJoinTeamGuarded } from './handlers/team.handlers.js'
 import { onGames } from './handlers/games.handlers.js'
 import { logger } from '#utils'
 import { registerInvitationActions } from './handlers/invitation.handlers.js'
@@ -34,8 +34,8 @@ export const setupBot = () => {
   bot.hears(buttons.PROFILE, onProfile)
   bot.hears(buttons.STATS, onStats)
   bot.hears(buttons.MY_TEAM, onMyTeam)
-  bot.hears(buttons.CREATE_TEAM, async ctx => ctx.scene.enter('createTeam'))
-  bot.hears(buttons.JOIN_TEAM, ctx => ctx.reply('Вступление в команду — скоро'))
+  bot.hears(buttons.CREATE_TEAM, async ctx => onCreateTeam(ctx))
+  bot.hears(buttons.JOIN_TEAM, onJoinTeamGuarded)
   bot.hears(buttons.GAMES, onGames)
   bot.hears(buttons.HELP, ctx => ctx.reply('Помощь — скоро'))
 
