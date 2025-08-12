@@ -2,9 +2,8 @@ import { createBot } from './botInit.js'
 import { MenuController } from './menu/menuController.js'
 import { buttons } from '#buttons'
 import { onProfile, onStats } from './handlers/profile.handlers.js'
-import { onMyTeam, onTeamOverview, onTeamManage, onTeamSettings } from './handlers/team.handlers.js'
+import { onMyTeam, onTeamOverview, onTeamManage, onTeamSettings, sendTeamRosterRich } from './handlers/team.handlers.js'
 import { onGames } from './handlers/games.handlers.js'
-import userService from '#userService'
 import { logger } from '#utils'
 
 export const setupBot = () => {
@@ -41,8 +40,7 @@ export const setupBot = () => {
 
   // Team nested menus
   safeHears(buttons.TEAM_VIEW, async ctx => {
-    const text = await userService.getTeamInfoText(ctx.from.id)
-    await ctx.reply(text)
+    await sendTeamRosterRich(ctx)
     return onTeamOverview(ctx)
   })
   safeHears(buttons.TEAM_MANAGE, onTeamManage)

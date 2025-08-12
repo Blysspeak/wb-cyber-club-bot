@@ -118,13 +118,20 @@ export const getTeamInfoText = async telegramId => {
     const title = `Команда: ${team.name} (${team.acronym})`
     const description = `Описание: ${team.description ? team.description : '-'}`
     const logo = `Логотип: ${team.logo ? team.logo : '-'}`
-    const captainLine = team.captain
-      ? `- ${team.captain.nickname || team.captain.name || team.captain.telegramUsername || team.captain.id} (CAPTAIN)`
-      : ''
+
+    const formatUser = (u, role) => {
+      const name = u.nickname || u.name || u.telegramUsername || u.id
+      const username = u.telegramUsername ? ` (@${String(u.telegramUsername).replace(/^@/, '')})` : ''
+      return `- ${name}${username} (${role})`
+    }
+
+    const captainLine = team.captain ? formatUser(team.captain, 'CAPTAIN') : ''
+
     const memberLines = (team.members || [])
       .filter(m => !team.captain || m.id !== team.captain.id)
-      .map(m => `- ${m.nickname || m.name || m.telegramUsername || m.id} (${m.role})`)
+      .map(m => formatUser(m, m.role))
       .join('\n')
+
     const roster = `Состав:\n${[captainLine, memberLines].filter(Boolean).join('\n')}`
 
     return [title, description, logo, roster].join('\n')
