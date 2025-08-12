@@ -10,9 +10,10 @@ export const gamesScene = new Scenes.WizardScene(
   'games',
   async ctx => {
     const user = await userService.getUserByTelegramId(ctx.from.id)
-    ctx.wizard.state.games = new Set(user?.games || [])
+    ctx.wizard.state.existing = new Set(user?.games || [])
+    ctx.wizard.state.selected = new Set()
     await ctx.reply(
-      `Выбери игры (нажимай, чтобы добавить/убрать). Когда закончишь — нажми "✅ Готово".`,
+      `Выбери игры (добавление только). Уже выбранные нельзя убрать. Когда закончишь — нажми "✅ Готово".`,
       kb()
     )
     return ctx.wizard.next()
@@ -22,15 +23,33 @@ export const gamesScene = new Scenes.WizardScene(
     if (!text) return
 
     if (text === '✅ Готово') {
-      if (ctx.wizard.state.games.size === 0) {
+      const union = new Set([...ctx.wizard.state.existing, ...ctx.wizard.state.selected])
+      if (union.size === 0) {
         await ctx.reply('Нужно выбрать минимум одну игру.')
         return
       }
-      if (ctx.wizard.state.games.has('MLBB')) {
+      ctx.wizard.state.unionGames = [...union]
+
+      const user = await userService.getUserByTelegramId(ctx.from.id)
+      const hasMLBB = union.has('MLBB')
+      const newlyAddedMLBB = ctx.wizard.state.selected.has('MLBB')
+      const missingMlbb = !user?.mlbbId || !user?.mlbbServer
+
+      if (hasMLBB && (newlyAddedMLBB || missingMlbb)) {
         await ctx.reply('Укажи MLBB ID (обязательно):')
         return ctx.wizard.next()
       }
-      return ctx.wizard.selectStep(3)
+
+      try {
+        const updated = await userService.updateUserProfile(ctx.from.id, {
+          games: ctx.wizard.state.unionGames
+        })
+        await ctx.reply(`Игры обновлены: ${updated.games.join(', ')}`)
+        return ctx.scene.leave()
+      } catch (e) {
+        await ctx.reply(`Ошибка сохранения игр: ${e.message}`)
+        return ctx.scene.leave()
+      }
     }
 
     if (text === '⬅️ Назад') {
@@ -38,11 +57,22 @@ export const gamesScene = new Scenes.WizardScene(
       return ctx.scene.leave()
     }
 
-    if (AVAILABLE_GAMES.includes(text)) {
-      if (ctx.wizard.state.games.has(text)) ctx.wizard.state.games.delete(text)
-      else ctx.wizard.state.games.add(text)
-      await ctx.reply(`Выбрано: ${[...ctx.wizard.state.games].join(', ') || '-'}`, kb())
+    if (!AVAILABLE_GAMES.includes(text)) return
+
+    if (text === 'CS2' || text === 'PUBG') {
+      await ctx.reply('Выбор этой игры пока в разработке')
+      return
     }
+
+    // Additive-only selection
+    if (ctx.wizard.state.existing.has(text) || ctx.wizard.state.selected.has(text)) {
+      await ctx.reply(`Игра уже выбрана: ${text}`, kb())
+      return
+    }
+
+    ctx.wizard.state.selected.add(text)
+    const union = new Set([...ctx.wizard.state.existing, ...ctx.wizard.state.selected])
+    await ctx.reply(`Выбрано: ${[...union].join(', ') || '-'}`, kb())
   },
   async ctx => {
     const text = ctx.message?.text?.trim()
@@ -64,7 +94,7 @@ export const gamesScene = new Scenes.WizardScene(
 
     try {
       const updated = await userService.updateUserProfile(ctx.from.id, {
-        games: [...ctx.wizard.state.games],
+        games: ctx.wizard.state.unionGames,
         mlbbId: ctx.wizard.state.mlbbId,
         mlbbServer: ctx.wizard.state.mlbbServer
       })
