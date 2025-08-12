@@ -101,7 +101,7 @@ export const respondToInvitation = async (telegramId, invitationId, response) =>
   if (invitation.userId !== user.id) throw new Error('Приглашение адресовано другому пользователю')
   if (invitation.status !== 'PENDING') throw new Error('Приглашение уже обработано')
 
-  const updatedInvitation = await prisma.invitation.update({ where: { id: invitationId }, data: { status: response } })
+  const updatedInvitation = await prisma.invitation.update({ where: { id: invitationId }, data: { status: response }, include: { team: { include: { captain: { select: { telegramId: true } } } } } })
 
   if (response === 'ACCEPTED') {
     await prisma.user.update({ where: { telegramId: BigInt(telegramId) }, data: { teamId: invitation.teamId, role: 'PLAYER' } })
