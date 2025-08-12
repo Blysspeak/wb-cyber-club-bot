@@ -19,19 +19,26 @@ export const connectCache = async () => {
 }
 
 const toKey = parts => parts.filter(Boolean).join(':')
+const safeStringify = value =>
+  JSON.stringify(value, (_, v) => (typeof v === 'bigint' ? v.toString() : v))
+const safeParse = str => JSON.parse(str)
 
 export const cacheGet = async (keyParts, fallbackFn, ttlSec = 60) => {
   const key = toKey(Array.isArray(keyParts) ? keyParts : [keyParts])
   const cached = await redis.get(key)
-  if (cached) return JSON.parse(cached)
+  if (cached) return safeParse(cached)
   const data = await fallbackFn()
-  await redis.set(key, JSON.stringify(data), 'EX', ttlSec)
+  try {
+    await redis.set(key, safeStringify(data), 'EX', ttlSec)
+  } catch (e) {
+    logger.warn(`Cache set failed for ${key}: ${e.message}`)
+  }
   return data
 }
 
 export const cacheSet = async (keyParts, value, ttlSec = 60) => {
   const key = toKey(Array.isArray(keyParts) ? keyParts : [keyParts])
-  await redis.set(key, JSON.stringify(value), 'EX', ttlSec)
+  await redis.set(key, safeStringify(value), 'EX', ttlSec)
 }
 
 export const cacheDel = async keyParts => {
