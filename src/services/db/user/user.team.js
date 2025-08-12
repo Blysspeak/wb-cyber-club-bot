@@ -1,5 +1,6 @@
 import { prisma } from '../prisma.js'
 import { getUserByTelegramId } from './user.read.js'
+import { cacheDel } from '#cache'
 
 export const createTeam = async (telegramId, teamData) => {
   const user = await getUserByTelegramId(telegramId)
@@ -25,6 +26,13 @@ export const createTeam = async (telegramId, teamData) => {
   })
 
   await prisma.user.update({ where: { id: user.id }, data: { role: 'CAPTAIN', teamId: team.id } })
+
+  await Promise.all([
+    cacheDel(['user', 'byTg', String(telegramId)]),
+    cacheDel(['team', 'byUserTg', String(telegramId)]),
+    cacheDel(['team', 'infoText', String(telegramId)])
+  ])
+
   return team
 }
 
@@ -55,7 +63,7 @@ export const updateTeam = async (telegramId, updateData) => {
     if (existingName) throw new Error('Название команды уже существует')
   }
 
-  return prisma.team.update({
+  const updated = await prisma.team.update({
     where: { id: team.id },
     data: {
       name: updateData.name || undefined,
@@ -65,6 +73,13 @@ export const updateTeam = async (telegramId, updateData) => {
     },
     include: { captain: true, members: true }
   })
+
+  await Promise.all([
+    cacheDel(['team', 'byUserTg', String(telegramId)]),
+    cacheDel(['team', 'infoText', String(telegramId)])
+  ])
+
+  return updated
 }
 
 export const invitePlayer = async (telegramId, playerTelegramId) => {
@@ -78,10 +93,13 @@ export const invitePlayer = async (telegramId, playerTelegramId) => {
   const existingInvitation = await prisma.invitation.findFirst({ where: { teamId: captainTeam.id, userId: player.id } })
   if (existingInvitation) throw new Error('Игрок уже приглашен в команду')
 
-  return prisma.invitation.create({
+  const invitation = await prisma.invitation.create({
     data: { teamId: captainTeam.id, userId: player.id, status: 'PENDING' },
     include: { team: true, user: true }
   })
+
+  await cacheDel(['team', 'byUserTg', String(telegramId)])
+  return invitation
 }
 
 export const removePlayer = async (telegramId, playerId) => {
@@ -92,7 +110,15 @@ export const removePlayer = async (telegramId, playerId) => {
   if (!player || player.teamId !== captainTeam.id) throw new Error('Игрок не найден в вашей команде')
   if (player.id === captainTeam.captainId) throw new Error('Капитан не может удалить сам себя из команды')
 
-  return prisma.user.update({ where: { id: playerId }, data: { teamId: null, role: 'PLAYER' } })
+  const updatedPlayer = await prisma.user.update({ where: { id: playerId }, data: { teamId: null, role: 'PLAYER' } })
+
+  await Promise.all([
+    cacheDel(['team', 'byUserTg', String(telegramId)]),
+    cacheDel(['team', 'infoText', String(telegramId)]),
+    cacheDel(['user', 'byTg', String(player.telegramId)])
+  ])
+
+  return updatedPlayer
 }
 
 export const deleteTeam = async telegramId => {
@@ -100,6 +126,12 @@ export const deleteTeam = async telegramId => {
   if (!captainTeam) throw new Error('Вы не являетесь капитаном команды')
 
   await prisma.team.delete({ where: { id: captainTeam.id } })
+
+  await Promise.all([
+    cacheDel(['team', 'byUserTg', String(telegramId)]),
+    cacheDel(['team', 'infoText', String(telegramId)])
+  ])
+
   return { success: true, message: 'Команда успешно удалена' }
 }
 

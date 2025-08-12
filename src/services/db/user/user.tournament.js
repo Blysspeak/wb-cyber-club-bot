@@ -1,5 +1,6 @@
 import { prisma } from '../prisma.js'
 import { getUserTeam } from './user.team.js'
+import { cacheDel } from '#cache'
 
 export const applyForTournament = async (telegramId, tournamentId) => {
   const captainTeam = await getUserTeam(telegramId)
@@ -14,10 +15,13 @@ export const applyForTournament = async (telegramId, tournamentId) => {
 
   if (captainTeam.members.length < 5) throw new Error('В команде должно быть минимум 5 игроков для участия в турнире')
 
-  return prisma.tournamentApplication.create({
+  const app = await prisma.tournamentApplication.create({
     data: { tournamentId, teamId: captainTeam.id, status: 'PENDING' },
     include: { tournament: true, team: { include: { captain: true, members: true } } }
   })
+
+  await cacheDel(['team', 'byUserTg', String(telegramId)])
+  return app
 }
 
 export const getTeamApplications = async telegramId => {

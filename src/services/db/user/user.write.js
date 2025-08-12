@@ -1,5 +1,6 @@
 import { prisma } from '../prisma.js'
 import { getUserByTelegramId } from './user.read.js'
+import { cacheDel } from '#cache'
 
 export const registerUser = async userData => {
   const existingUser = await prisma.user.findUnique({
@@ -7,7 +8,7 @@ export const registerUser = async userData => {
   })
   if (existingUser) throw new Error('Пользователь уже зарегистрирован')
 
-  return prisma.user.create({
+  const user = await prisma.user.create({
     data: {
       telegramId: BigInt(userData.telegramId),
       telegramUsername: userData.telegramUsername || null,
@@ -22,6 +23,13 @@ export const registerUser = async userData => {
       mlbbServer: userData.mlbbServer || undefined
     }
   })
+
+  await Promise.all([
+    cacheDel(['user', 'byTg', String(userData.telegramId)]),
+    cacheDel(['user', 'stats', String(userData.telegramId)])
+  ])
+
+  return user
 }
 
 export const updateUserProfile = async (telegramId, updateData) => {
@@ -35,7 +43,7 @@ export const updateUserProfile = async (telegramId, updateData) => {
     if (existingUserByWb) throw new Error('Wildberries ID уже используется другим пользователем')
   }
 
-  return prisma.user.update({
+  const updated = await prisma.user.update({
     where: { telegramId: BigInt(telegramId) },
     data: {
       wildberriesId: updateData.wildberriesId ?? undefined,
@@ -49,6 +57,15 @@ export const updateUserProfile = async (telegramId, updateData) => {
     },
     include: { team: true }
   })
+
+  await Promise.all([
+    cacheDel(['user', 'byTg', String(telegramId)]),
+    cacheDel(['user', 'stats', String(telegramId)]),
+    cacheDel(['team', 'byUserTg', String(telegramId)]),
+    cacheDel(['team', 'infoText', String(telegramId)])
+  ])
+
+  return updated
 }
 
 export const leaveTeam = async telegramId => {
@@ -61,10 +78,18 @@ export const leaveTeam = async telegramId => {
     throw new Error('Капитан не может покинуть команду. Сначала удалите команду или передайте капитанство.')
   }
 
-  return prisma.user.update({
+  const updated = await prisma.user.update({
     where: { telegramId: BigInt(telegramId) },
     data: { teamId: null, role: 'PLAYER' }
   })
+
+  await Promise.all([
+    cacheDel(['user', 'byTg', String(telegramId)]),
+    cacheDel(['team', 'byUserTg', String(telegramId)]),
+    cacheDel(['team', 'infoText', String(telegramId)])
+  ])
+
+  return updated
 }
 
 export const respondToInvitation = async (telegramId, invitationId, response) => {
@@ -81,6 +106,12 @@ export const respondToInvitation = async (telegramId, invitationId, response) =>
   if (response === 'ACCEPTED') {
     await prisma.user.update({ where: { telegramId: BigInt(telegramId) }, data: { teamId: invitation.teamId, role: 'PLAYER' } })
   }
+
+  await Promise.all([
+    cacheDel(['user', 'byTg', String(telegramId)]),
+    cacheDel(['team', 'byUserTg', String(telegramId)]),
+    cacheDel(['team', 'infoText', String(telegramId)])
+  ])
 
   return { invitation: updatedInvitation, accepted: response === 'ACCEPTED' }
 } 
