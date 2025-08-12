@@ -1,6 +1,8 @@
 import { BOT_TOKEN, logger, messageLogger } from '#utils'
-import { Telegraf } from 'telegraf'
+import { Telegraf, Scenes, session } from 'telegraf'
 import { MenuController } from './menu/menuController.js'
+import { registerScene } from './scenes/registration.scene.js'
+import userService from '../../services/db/user.service.js'
 
 class Bot {
   constructor(token) {
@@ -9,6 +11,25 @@ class Bot {
 
   init() {
     this.bot.use(messageLogger)
+    this.bot.use(session())
+
+    const stage = new Scenes.Stage([registerScene])
+    this.bot.use(stage.middleware())
+
+    this.bot.start(async ctx => {
+      try {
+        const existing = await userService.getUserByTelegramId(ctx.from.id)
+        if (!existing) {
+          await ctx.reply('Привет! Давай зарегистрируемся.')
+          return ctx.scene.enter('register')
+        }
+        return MenuController.sendMenu(ctx)
+      } catch (err) {
+        logger.error('Ошибка при /start', err)
+        return ctx.reply('Произошла ошибка. Попробуйте позже.')
+      }
+    })
+
     this.bot.start(MenuController.sendMenu)
     this.handleErrors()
     this.handleSignals()
@@ -34,4 +55,9 @@ class Bot {
   }
 }
 
-export const bot = new Bot(BOT_TOKEN).init()
+export const createBot = () => {
+  if (!BOT_TOKEN) {
+    return null
+  }
+  return new Bot(BOT_TOKEN).init()
+}

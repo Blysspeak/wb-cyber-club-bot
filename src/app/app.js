@@ -1,9 +1,9 @@
-import { logger } from '#utils'
+import { logger, PORT } from '#utils'
 import express from 'express'
 
 export const startServer = bot => {
   const app = express()
-  const port = 10001
+  const port = PORT
 
   app.get('/', (req, res) => {
     res.send('Bot is running!')
@@ -11,9 +11,13 @@ export const startServer = bot => {
 
   app.listen(port, () => {
     logger.info(`Server is running on port ${port}`)
-    bot.launch(() => {
-      logger.info('Bot has been started')
-    })
+    if (bot) {
+      bot.launch(() => {
+        logger.info('Bot has been started')
+      })
+    } else {
+      logger.warn('Bot is not started because BOT_TOKEN is missing')
+    }
   })
 
   return app

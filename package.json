@@ -2,13 +2,18 @@
   "type": "module",
   "scripts": {
     "start": "node --no-warnings src/main.js",
-    "dev": "nodemon --no-warnings src/main.js"
+    "dev": "nodemon --no-warnings src/main.js",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate deploy",
+    "prisma:push": "prisma db push"
   },
   "imports": {
+    "#userService": "./src/services/db/user.service.js",
     "#utils": "./src/modules/utils/index.js",
     "#buttons": "./src/modules/bot/menu/buttons.js"
   },
   "dependencies": {
+    "@prisma/client": "^6.14.0",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "pino": "^9.7.0",
@@ -17,6 +22,7 @@
     "zod": "^4.0.14"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "prisma": "^6.14.0"
   }
 }

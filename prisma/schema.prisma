@@ -1,0 +1,139 @@
+// schema.prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// МОДЕЛЬ ПОЛЬЗОВАТЕЛЯ
+model User {
+  id               Int       @id @default(autoincrement())
+  telegramId       BigInt    @unique
+  telegramUsername String?
+  wildberriesId    String
+  name             String    @db.VarChar(100)
+  nickname         String    @db.VarChar(50)
+  discord          String?   @db.VarChar(255)
+  birthDate        DateTime?
+  games            String[]  @default(["MLBB"])
+  teamId           Int?
+  team             Team?     @relation("TeamMembers", fields: [teamId], references: [id], onDelete: SetNull)
+  role             Role      @default(PLAYER)
+  captainOf        Team?     @relation("TeamCaptain")
+  invitations      Invitation[]
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
+
+  @@map("User")
+}
+
+// РОЛИ ПОЛЬЗОВАТЕЛЕЙ
+enum Role {
+  PLAYER
+  CAPTAIN
+  ADMIN
+}
+
+// МОДЕЛЬ КОМАНДЫ
+model Team {
+  id            Int       @id @default(autoincrement())
+  name          String    @unique @db.VarChar(255)
+  acronym       String    @unique @db.VarChar(4)
+  description   String?
+  logo          String?
+  captainId     Int       @unique
+  captain       User      @relation("TeamCaptain", fields: [captainId], references: [id], onDelete: Cascade)
+  members       User[]    @relation("TeamMembers")
+  invitations   Invitation[]
+  applications  TournamentApplication[]
+  tournaments   TeamTournament[]
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@map("Team")
+}
+
+// МОДЕЛЬ ПРИГЛАШЕНИЙ
+model Invitation {
+  id        Int          @id @default(autoincrement())
+  teamId    Int
+  team      Team         @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  userId    Int
+  user      User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    InviteStatus @default(PENDING)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@unique([teamId, userId])
+  @@map("Invitation")
+}
+
+// СТАТУСЫ ПРИГЛАШЕНИЙ
+enum InviteStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+// МОДЕЛЬ ТУРНИРОВ
+model Tournament {
+  id              Int              @id @default(autoincrement())
+  name            String           @db.VarChar(255)
+  description     String?
+  prizePool       String?          @db.VarChar(255)
+  maxTeams        Int
+  game            String           @default("MLBB") @db.VarChar(50)
+  status          TournamentStatus @default(OPEN)
+  applications    TournamentApplication[]
+  teams           TeamTournament[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@map("Tournament")
+}
+
+// СТАТУСЫ ТУРНИРОВ
+enum TournamentStatus {
+  OPEN
+  CLOSED
+  FINISHED
+}
+
+// МОДЕЛЬ ЗАЯВОК НА ТУРНИРЫ
+model TournamentApplication {
+  id              Int               @id @default(autoincrement())
+  tournamentId    Int
+  tournament      Tournament        @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  teamId          Int
+  team            Team              @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  status          ApplicationStatus @default(PENDING)
+  rejectionReason String?
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  @@unique([tournamentId, teamId])
+  @@map("TournamentApplication")
+}
+
+// СТАТУСЫ ЗАЯВОК
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+// МОДЕЛЬ УЧАСТНИКОВ ТУРНИРОВ
+model TeamTournament {
+  id           Int        @id @default(autoincrement())
+  teamId       Int
+  team         Team       @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  tournamentId Int
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  createdAt    DateTime   @default(now())
+
+  @@unique([teamId, tournamentId])
+  @@map("TeamTournament")
+}
