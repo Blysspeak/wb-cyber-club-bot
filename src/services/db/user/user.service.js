@@ -6,7 +6,8 @@ import {
   getTeamMembers,
   isCaptain,
   isAdmin,
-  getTeamInfoText
+  getTeamInfoText,
+  getUserByTelegramUsername
 } from './user.read.js'
 import { registerUser, updateUserProfile, leaveTeam, respondToInvitation } from './user.write.js'
 import {
@@ -26,6 +27,7 @@ class UserService {
   // user
   registerUser = registerUser
   getUserByTelegramId = getUserByTelegramId
+  getUserByTelegramUsername = getUserByTelegramUsername
   updateUserProfile = updateUserProfile
   getUserStats = getUserStats
   leaveTeam = leaveTeam

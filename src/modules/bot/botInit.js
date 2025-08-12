@@ -7,6 +7,8 @@ import { updateTeamScene } from './scenes/updateTeam.scene.js'
 import { gamesScene } from './scenes/games.scene.js'
 import { mlbbScene } from './scenes/mlbb.scene.js'
 import userService from '#userService'
+import { invitePlayerScene } from './scenes/invitePlayer.scene.js'
+import { removePlayerScene } from './scenes/removePlayer.scene.js'
 
 class Bot {
   constructor(token) {
@@ -17,7 +19,7 @@ class Bot {
     this.bot.use(messageLogger)
     this.bot.use(session())
 
-    const stage = new Scenes.Stage([registerScene, createTeamScene, updateTeamScene, gamesScene, mlbbScene])
+    const stage = new Scenes.Stage([registerScene, createTeamScene, updateTeamScene, gamesScene, mlbbScene, invitePlayerScene, removePlayerScene])
     this.bot.use(stage.middleware())
 
     this.bot.start(async ctx => {

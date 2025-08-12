@@ -5,6 +5,7 @@ import { onProfile, onStats } from './handlers/profile.handlers.js'
 import { onMyTeam, onTeamOverview, onTeamManage, onTeamSettings, sendTeamRosterRich } from './handlers/team.handlers.js'
 import { onGames } from './handlers/games.handlers.js'
 import { logger } from '#utils'
+import { registerInvitationActions } from './handlers/invitation.handlers.js'
 
 export const setupBot = () => {
   const bot = createBot()
@@ -45,8 +46,8 @@ export const setupBot = () => {
   })
   safeHears(buttons.TEAM_MANAGE, onTeamManage)
   safeHears(buttons.TEAM_SETTINGS, onTeamSettings)
-  safeHears(buttons.TEAM_INVITE, ctx => ctx.reply('Пригласить игрока — скоро'))
-  safeHears(buttons.TEAM_REMOVE, ctx => ctx.reply('Удалить игрока — скоро'))
+  safeHears(buttons.TEAM_INVITE, ctx => ctx.scene.enter('invitePlayer'))
+  safeHears(buttons.TEAM_REMOVE, ctx => ctx.scene.enter('removePlayer'))
   safeHears(buttons.TEAM_DELETE, ctx => ctx.reply('Удаление команды — скоро'))
   safeHears(buttons.TEAM_UPDATE, ctx => ctx.scene.enter('updateTeam'))
   safeHears(buttons.TEAM_INVITATIONS, ctx => ctx.reply('Приглашения — скоро'))
@@ -54,6 +55,9 @@ export const setupBot = () => {
   safeHears(buttons.TEAM_APPLY, ctx => ctx.reply('Заявка на турнир — скоро'))
   safeHears(buttons.TEAM_APPS, ctx => ctx.reply('Заявки команды — скоро'))
   safeHears(buttons.TEAM_TOURNAMENTS, ctx => ctx.reply('Активные турниры — скоро'))
+
+  // Invite callbacks
+  registerInvitationActions(bot)
 
   // Contextual Back
   bot.hears(buttons.BACK, async ctx => {

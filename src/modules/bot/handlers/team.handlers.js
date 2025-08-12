@@ -54,4 +54,7 @@ export const onMyTeam = async ctx => {
 
 export const onTeamOverview = async ctx => MenuController.sendTeamOverviewMenu(ctx)
 export const onTeamManage = async ctx => MenuController.sendTeamManageMenu(ctx)
-export const onTeamSettings = async ctx => MenuController.sendTeamSettingsMenu(ctx) 
+export const onTeamSettings = async ctx => MenuController.sendTeamSettingsMenu(ctx)
+
+export const onTeamInvite = async ctx => ctx.scene.enter('invitePlayer')
+export const onTeamRemove = async ctx => ctx.scene.enter('removePlayer') 

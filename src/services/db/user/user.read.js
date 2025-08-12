@@ -136,4 +136,13 @@ export const getTeamInfoText = async telegramId => {
 
     return [title, description, logo, roster].join('\n')
   }, 60)
+}
+
+export const getUserByTelegramUsername = async username => {
+  if (!username) return null
+  const clean = String(username).replace(/^@/, '')
+  if (!clean) return null
+  return prisma.user.findFirst({
+    where: { telegramUsername: clean }
+  })
 } 
