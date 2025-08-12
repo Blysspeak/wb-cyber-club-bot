@@ -9,6 +9,15 @@ export const getUserMenu = user => {
   } else {
     menu.push(buttons.CREATE_TEAM, buttons.JOIN_TEAM)
   }
+
+  if (user.role === 'CAPTAIN') {
+    menu.push(buttons.MANAGE_TEAM)
+  }
+
+  if (user.role === 'ADMIN') {
+    menu.push(buttons.MANAGE_TOURNAMENTS, buttons.MANAGE_USERS, buttons.OVERALL_STATS)
+  }
+
   menu.push(buttons.HELP)
 
   return Markup.keyboard(menu, {

@@ -17,5 +17,19 @@ export const buttons = {
   // Admin specific
   MANAGE_TOURNAMENTS: '🏆 Управление турнирами',
   MANAGE_USERS: '👥 Управление пользователями',
-  OVERALL_STATS: '📈 Общая статистика'
+  OVERALL_STATS: '📈 Общая статистика',
+
+  // Manage Team submenu
+  TEAM_VIEW: '👥 Состав команды',
+  TEAM_INVITE: '📨 Пригласить игрока',
+  TEAM_REMOVE: '➖ Удалить игрока',
+  TEAM_UPDATE: '✏️ Обновить команду',
+  TEAM_DELETE: '🗑 Удалить команду',
+  TEAM_INVITATIONS: '📬 Приглашения',
+  TEAM_STATS: '📊 Статистика команды',
+  TEAM_APPLY: '📝 Заявка на турнир',
+  TEAM_APPS: '🗂 Заявки команды',
+  TEAM_TOURNAMENTS: '🎯 Активные турниры',
+
+  BACK: '⬅️ Назад'
 }

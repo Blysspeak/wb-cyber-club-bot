@@ -2,7 +2,9 @@ import { BOT_TOKEN, logger, messageLogger } from '#utils'
 import { Telegraf, Scenes, session } from 'telegraf'
 import { MenuController } from './menu/menuController.js'
 import { registerScene } from './scenes/registration.scene.js'
-import userService from '../../services/db/user.service.js'
+import { createTeamScene } from './scenes/createTeam.scene.js'
+import { updateTeamScene } from './scenes/updateTeam.scene.js'
+import userService from '#userService'
 
 class Bot {
   constructor(token) {
@@ -13,7 +15,7 @@ class Bot {
     this.bot.use(messageLogger)
     this.bot.use(session())
 
-    const stage = new Scenes.Stage([registerScene])
+    const stage = new Scenes.Stage([registerScene, createTeamScene, updateTeamScene])
     this.bot.use(stage.middleware())
 
     this.bot.start(async ctx => {
