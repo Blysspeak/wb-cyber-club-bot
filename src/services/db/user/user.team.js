@@ -93,8 +93,10 @@ export const invitePlayer = async (telegramId, playerTelegramId) => {
   const existingInvitation = await prisma.invitation.findFirst({ where: { teamId: captainTeam.id, userId: player.id } })
   if (existingInvitation) {
     if (existingInvitation.status === 'PENDING') throw new Error('Игрок уже приглашен в команду')
-    if (existingInvitation.status === 'ACCEPTED') throw new Error('Игрок уже состоит в команде')
-    // Re-invite previously rejected user by reopening the same invitation
+    if (existingInvitation.status === 'ACCEPTED' && player.teamId === captainTeam.id) {
+      throw new Error('Игрок уже состоит в команде')
+    }
+    // Re-invite by reopening the same invitation for REJECTED or ACCEPTED (if player уже не в команде)
     const reopened = await prisma.invitation.update({
       where: { id: existingInvitation.id },
       data: { status: 'PENDING' },
