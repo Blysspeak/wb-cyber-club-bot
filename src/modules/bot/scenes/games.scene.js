@@ -1,5 +1,6 @@
 import { Scenes, Markup } from 'telegraf'
 import userService from '#userService'
+import { MenuController } from '../menu/menuController.js'
 
 const AVAILABLE_GAMES = ['MLBB', 'CS2', 'PUBG']
 
@@ -56,7 +57,7 @@ export const gamesScene = new Scenes.WizardScene(
     }
 
     if (text === '⬅️ Назад') {
-      await ctx.reply('Отмена')
+      await MenuController.sendMenu(ctx)
       return ctx.scene.leave()
     }
 
