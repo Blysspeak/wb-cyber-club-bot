@@ -10,6 +10,8 @@ export const getUserMenu = user => {
     menu.push(buttons.CREATE_TEAM, buttons.JOIN_TEAM)
   }
 
+  menu.push(buttons.GAMES)
+
   if (user.role === 'CAPTAIN') {
     menu.push(buttons.MANAGE_TEAM)
   }

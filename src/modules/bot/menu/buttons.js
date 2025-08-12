@@ -9,13 +9,14 @@ export const buttons = {
   MY_TEAM: '🛡️ Моя команда',
   CREATE_TEAM: '➕ Создать команду',
   JOIN_TEAM: '🤝 Вступить в команду',
+  GAMES: '🎮 Мои игры',
 
   // Captain specific
   MANAGE_TEAM: '🛡️ Управление командой',
   MY_TOURNAMENTS: '🏆 Мои турниры',
 
   // Admin specific
-  MANAGE_TOURNAMENTS: '🏆 Управление турнирами',
+  MANAGE_TOURNAMENTS: '🏆 Управление турнинами',
   MANAGE_USERS: '👥 Управление пользователями',
   OVERALL_STATS: '📈 Общая статистика',
 

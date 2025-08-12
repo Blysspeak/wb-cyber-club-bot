@@ -1,7 +1,9 @@
 import { createBot } from './botInit.js'
 import { MenuController } from './menu/menuController.js'
-import userService from '#userService'
 import { buttons } from '#buttons'
+import { onProfile, onStats } from './handlers/profile.handlers.js'
+import { onMyTeam, onManageTeam } from './handlers/team.handlers.js'
+import { onGames } from './handlers/games.handlers.js'
 
 export const setupBot = () => {
   const bot = createBot()
@@ -13,35 +15,16 @@ export const setupBot = () => {
   bot.command('menu', MenuController.sendMenu)
 
   // User Menu
-  bot.hears(buttons.PROFILE, async ctx => {
-    const user = await userService.getUserByTelegramId(ctx.from.id)
-    if (!user) return ctx.reply('Вы не зарегистрированы. Введите /start')
-    return ctx.reply(`Профиль:\nИмя: ${user.name}\nНик: ${user.nickname}\nРоль: ${user.role}`)
-  })
-  bot.hears(buttons.STATS, async ctx => {
-    const stats = await userService.getUserStats(ctx.from.id)
-    return ctx.reply(
-      `Статистика:\nТурниров: ${stats.totalTournaments}\nЗаявок: ${stats.totalApplications}`
-    )
-  })
-  bot.hears(buttons.MY_TEAM, async ctx => {
-    try {
-      const text = await userService.getTeamInfoText(ctx.from.id)
-      await ctx.reply(text)
-      const user = await userService.getUserByTelegramId(ctx.from.id)
-      if (user?.role === 'CAPTAIN') {
-        await MenuController.sendManageTeamMenu(ctx)
-      }
-    } catch (e) {
-      await ctx.reply(e.message)
-    }
-  })
+  bot.hears(buttons.PROFILE, onProfile)
+  bot.hears(buttons.STATS, onStats)
+  bot.hears(buttons.MY_TEAM, onMyTeam)
   bot.hears(buttons.CREATE_TEAM, async ctx => ctx.scene.enter('createTeam'))
   bot.hears(buttons.JOIN_TEAM, ctx => ctx.reply('Вступление в команду — скоро'))
+  bot.hears(buttons.GAMES, onGames)
   bot.hears(buttons.HELP, ctx => ctx.reply('Помощь — скоро'))
 
   // Manage Team submenu
-  bot.hears(buttons.MANAGE_TEAM, MenuController.sendManageTeamMenu)
+  bot.hears(buttons.MANAGE_TEAM, onManageTeam)
   bot.hears(buttons.TEAM_VIEW, ctx => ctx.reply('Просмотр состава — скоро'))
   bot.hears(buttons.TEAM_INVITE, ctx => ctx.reply('Пригласить игрока — скоро'))
   bot.hears(buttons.TEAM_REMOVE, ctx => ctx.reply('Удалить игрока — скоро'))

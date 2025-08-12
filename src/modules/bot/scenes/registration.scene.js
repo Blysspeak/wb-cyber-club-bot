@@ -38,27 +38,70 @@ export const registerScene = new Scenes.WizardScene(
       return
     }
     ctx.wizard.state.data.nickname = input
-    await ask(ctx, 'Укажи Discord (или напиши "пропустить"):')
+    await ask(ctx, 'Укажи Discord:')
     return ctx.wizard.next()
   },
   async ctx => {
     const input = ctx.message?.text?.trim()
-    if (input && input.toLowerCase() !== 'пропустить') {
-      ctx.wizard.state.data.discord = input
+    if (!input) {
+      await ask(ctx, 'Discord обязателен. Введи Discord:')
+      return
     }
-    await ask(ctx, 'Дата рождения в формате ГГГГ-ММ-ДД (или напиши "пропустить"):')
+    ctx.wizard.state.data.discord = input
+    await ask(ctx, 'Дата рождения в формате ГГГГ-ММ-ДД:')
     return ctx.wizard.next()
   },
   async ctx => {
     const input = ctx.message?.text?.trim()
-    if (input && input.toLowerCase() !== 'пропустить') {
-      const date = new Date(input)
-      if (isNaN(date.getTime())) {
-        await ask(ctx, 'Неверный формат даты. Введи ГГГГ-ММ-ДД или "пропустить":')
-        return
-      }
-      ctx.wizard.state.data.birthDate = input
+    const date = new Date(input)
+    if (!input || isNaN(date.getTime())) {
+      await ask(ctx, 'Неверный формат даты. Введи ГГГГ-ММ-ДД:')
+      return
     }
+    ctx.wizard.state.data.birthDate = input
+    await ask(ctx, 'Выбери игры (MLBB, CS2, PUBG). Перечисли через запятую:')
+    return ctx.wizard.next()
+  },
+  async ctx => {
+    const input = ctx.message?.text?.trim()
+    if (!input) {
+      await ask(ctx, 'Нужно указать хотя бы одну игру. Перечисли через запятую:')
+      return
+    }
+    const games = input
+      .split(',')
+      .map(s => s.trim().toUpperCase())
+      .filter(Boolean)
+    if (games.length === 0) {
+      await ask(ctx, 'Нужно указать хотя бы одну игру. Перечисли через запятую:')
+      return
+    }
+    ctx.wizard.state.data.games = games
+
+    if (games.includes('MLBB')) {
+      await ask(ctx, 'Укажи MLBB ID:')
+      return ctx.wizard.next()
+    }
+
+    return ctx.wizard.selectStep(7)
+  },
+  async ctx => {
+    const input = ctx.message?.text?.trim()
+    if (!input) {
+      await ask(ctx, 'MLBB ID обязателен:')
+      return
+    }
+    ctx.wizard.state.data.mlbbId = input
+    await ask(ctx, 'Укажи MLBB сервер:')
+    return ctx.wizard.next()
+  },
+  async ctx => {
+    const input = ctx.message?.text?.trim()
+    if (!input) {
+      await ask(ctx, 'MLBB сервер обязателен:')
+      return
+    }
+    ctx.wizard.state.data.mlbbServer = input
 
     try {
       const user = await userService.registerUser(ctx.wizard.state.data)

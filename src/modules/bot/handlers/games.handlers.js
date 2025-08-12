@@ -1,0 +1,1 @@
+export const onGames = async ctx => ctx.scene.enter('games') 

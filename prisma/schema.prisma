@@ -19,6 +19,8 @@ model User {
   discord          String?   @db.VarChar(255)
   birthDate        DateTime?
   games            String[]  @default(["MLBB"])
+  mlbbId           String?   @db.VarChar(64)
+  mlbbServer       String?   @db.VarChar(32)
   teamId           Int?
   team             Team?     @relation("TeamMembers", fields: [teamId], references: [id], onDelete: SetNull)
   role             Role      @default(PLAYER)

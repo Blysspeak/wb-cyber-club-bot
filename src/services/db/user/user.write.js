@@ -16,7 +16,10 @@ export const registerUser = async userData => {
       nickname: userData.nickname,
       discord: userData.discord || null,
       birthDate: userData.birthDate ? new Date(userData.birthDate) : null,
-      role: 'PLAYER'
+      role: 'PLAYER',
+      games: userData.games || undefined,
+      mlbbId: userData.mlbbId || undefined,
+      mlbbServer: userData.mlbbServer || undefined
     }
   })
 }
@@ -40,7 +43,9 @@ export const updateUserProfile = async (telegramId, updateData) => {
       nickname: updateData.nickname ?? undefined,
       discord: updateData.discord ?? undefined,
       birthDate: updateData.birthDate ? new Date(updateData.birthDate) : undefined,
-      games: updateData.games ?? undefined
+      games: updateData.games ?? undefined,
+      mlbbId: updateData.mlbbId ?? undefined,
+      mlbbServer: updateData.mlbbServer ?? undefined
     },
     include: { team: true }
   })
