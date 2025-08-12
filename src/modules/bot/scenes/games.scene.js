@@ -3,8 +3,11 @@ import userService from '#userService'
 
 const AVAILABLE_GAMES = ['MLBB', 'CS2', 'PUBG']
 
-const kb = () =>
-  Markup.keyboard([...AVAILABLE_GAMES, '✅ Готово', '⬅️ Назад'], { columns: 3 }).resize()
+const kb = hasSelection =>
+  Markup.keyboard(
+    [...AVAILABLE_GAMES, ...(hasSelection ? ['✅ Готово'] : []), '⬅️ Назад'],
+    { columns: 3 }
+  ).resize()
 
 export const gamesScene = new Scenes.WizardScene(
   'games',
@@ -14,7 +17,7 @@ export const gamesScene = new Scenes.WizardScene(
     ctx.wizard.state.selected = new Set()
     await ctx.reply(
       `Выбери игры (добавление только). Уже выбранные нельзя убрать. Когда закончишь — нажми "✅ Готово".`,
-      kb()
+      kb(false)
     )
     return ctx.wizard.next()
   },
@@ -23,11 +26,11 @@ export const gamesScene = new Scenes.WizardScene(
     if (!text) return
 
     if (text === '✅ Готово') {
-      const union = new Set([...ctx.wizard.state.existing, ...ctx.wizard.state.selected])
-      if (union.size === 0) {
-        await ctx.reply('Нужно выбрать минимум одну игру.')
+      if (ctx.wizard.state.selected.size === 0) {
+        await ctx.reply('Сначала выбери хотя бы одну новую игру.', kb(false))
         return
       }
+      const union = new Set([...ctx.wizard.state.existing, ...ctx.wizard.state.selected])
       ctx.wizard.state.unionGames = [...union]
 
       const user = await userService.getUserByTelegramId(ctx.from.id)
@@ -60,19 +63,19 @@ export const gamesScene = new Scenes.WizardScene(
     if (!AVAILABLE_GAMES.includes(text)) return
 
     if (text === 'CS2' || text === 'PUBG') {
-      await ctx.reply('Выбор этой игры пока в разработке')
+      await ctx.reply('Выбор этой игры пока в разработке', kb(ctx.wizard.state.selected.size > 0))
       return
     }
 
     // Additive-only selection
     if (ctx.wizard.state.existing.has(text) || ctx.wizard.state.selected.has(text)) {
-      await ctx.reply(`Игра уже выбрана: ${text}`, kb())
+      await ctx.reply(`Игра уже выбрана: ${text}`, kb(ctx.wizard.state.selected.size > 0))
       return
     }
 
     ctx.wizard.state.selected.add(text)
     const union = new Set([...ctx.wizard.state.existing, ...ctx.wizard.state.selected])
-    await ctx.reply(`Выбрано: ${[...union].join(', ') || '-'}`, kb())
+    await ctx.reply(`Выбрано: ${[...union].join(', ') || '-'}`, kb(true))
   },
   async ctx => {
     const text = ctx.message?.text?.trim()
