@@ -22,9 +22,11 @@ export const buttons = {
 
   // Manage Team submenu
   TEAM_VIEW: '👥 Состав команды',
+  TEAM_MANAGE: '👥 Управление составом',
   TEAM_INVITE: '📨 Пригласить игрока',
   TEAM_REMOVE: '➖ Удалить игрока',
-  TEAM_UPDATE: '✏️ Обновить команду',
+  TEAM_UPDATE: '✏️ Обновить информацию',
+  TEAM_SETTINGS: '⚙️ Настройки команды',
   TEAM_DELETE: '🗑 Удалить команду',
   TEAM_INVITATIONS: '📬 Приглашения',
   TEAM_STATS: '📊 Статистика команды',

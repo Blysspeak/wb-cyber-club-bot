@@ -2,14 +2,30 @@ import { createBot } from './botInit.js'
 import { MenuController } from './menu/menuController.js'
 import { buttons } from '#buttons'
 import { onProfile, onStats } from './handlers/profile.handlers.js'
-import { onMyTeam, onManageTeam } from './handlers/team.handlers.js'
+import { onMyTeam, onTeamOverview, onTeamManage, onTeamSettings } from './handlers/team.handlers.js'
 import { onGames } from './handlers/games.handlers.js'
+import userService from '#userService'
+import { logger } from '#utils'
 
 export const setupBot = () => {
   const bot = createBot()
 
   if (!bot) {
     return null
+  }
+
+  const safeHears = (trigger, handler) => {
+    const isValidTrigger =
+      typeof trigger === 'string' ||
+      trigger instanceof RegExp ||
+      typeof trigger === 'function' ||
+      (Array.isArray(trigger) && trigger.every(t => typeof t === 'string' || t instanceof RegExp || typeof t === 'function'))
+
+    if (!isValidTrigger) {
+      logger.error('Invalid trigger passed to hears', { trigger })
+      return
+    }
+    bot.hears(trigger, handler)
   }
 
   bot.command('menu', MenuController.sendMenu)
@@ -23,18 +39,32 @@ export const setupBot = () => {
   bot.hears(buttons.GAMES, onGames)
   bot.hears(buttons.HELP, ctx => ctx.reply('Помощь — скоро'))
 
-  // Manage Team submenu
-  bot.hears(buttons.MANAGE_TEAM, onManageTeam)
-  bot.hears(buttons.TEAM_VIEW, ctx => ctx.reply('Просмотр состава — скоро'))
-  bot.hears(buttons.TEAM_INVITE, ctx => ctx.reply('Пригласить игрока — скоро'))
-  bot.hears(buttons.TEAM_REMOVE, ctx => ctx.reply('Удалить игрока — скоро'))
-  bot.hears(buttons.TEAM_UPDATE, ctx => ctx.scene.enter('updateTeam'))
-  bot.hears(buttons.TEAM_INVITATIONS, ctx => ctx.reply('Приглашения — скоро'))
-  bot.hears(buttons.TEAM_STATS, ctx => ctx.reply('Статистика команды — скоро'))
-  bot.hears(buttons.TEAM_APPLY, ctx => ctx.reply('Заявка на турнир — скоро'))
-  bot.hears(buttons.TEAM_APPS, ctx => ctx.reply('Заявки команды — скоро'))
-  bot.hears(buttons.TEAM_TOURNAMENTS, ctx => ctx.reply('Активные турниры — скоро'))
-  bot.hears(buttons.BACK, MenuController.sendMenu)
+  // Team nested menus
+  safeHears(buttons.TEAM_VIEW, async ctx => {
+    const text = await userService.getTeamInfoText(ctx.from.id)
+    await ctx.reply(text)
+    return onTeamOverview(ctx)
+  })
+  safeHears(buttons.TEAM_MANAGE, onTeamManage)
+  safeHears(buttons.TEAM_SETTINGS, onTeamSettings)
+  safeHears(buttons.TEAM_INVITE, ctx => ctx.reply('Пригласить игрока — скоро'))
+  safeHears(buttons.TEAM_REMOVE, ctx => ctx.reply('Удалить игрока — скоро'))
+  safeHears(buttons.TEAM_DELETE, ctx => ctx.reply('Удаление команды — скоро'))
+  safeHears(buttons.TEAM_UPDATE, ctx => ctx.scene.enter('updateTeam'))
+  safeHears(buttons.TEAM_INVITATIONS, ctx => ctx.reply('Приглашения — скоро'))
+  safeHears(buttons.TEAM_STATS, ctx => ctx.reply('Статистика команды — скоро'))
+  safeHears(buttons.TEAM_APPLY, ctx => ctx.reply('Заявка на турнир — скоро'))
+  safeHears(buttons.TEAM_APPS, ctx => ctx.reply('Заявки команды — скоро'))
+  safeHears(buttons.TEAM_TOURNAMENTS, ctx => ctx.reply('Активные турниры — скоро'))
+
+  // Contextual Back
+  bot.hears(buttons.BACK, async ctx => {
+    const state = ctx.session?.menuState
+    if (state === 'TEAM_MANAGE' || state === 'TEAM_SETTINGS') {
+      return onTeamOverview(ctx)
+    }
+    return MenuController.sendMenu(ctx)
+  })
 
   // Admin Menu
   bot.hears(buttons.MANAGE_TOURNAMENTS, ctx => ctx.reply('Управление турнинами — скоро'))

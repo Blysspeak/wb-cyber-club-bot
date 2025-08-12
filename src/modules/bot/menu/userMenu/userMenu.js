@@ -12,10 +12,6 @@ export const getUserMenu = user => {
 
   menu.push(buttons.GAMES)
 
-  if (user.role === 'CAPTAIN') {
-    menu.push(buttons.MANAGE_TEAM)
-  }
-
   if (user.role === 'ADMIN') {
     menu.push(buttons.MANAGE_TOURNAMENTS, buttons.MANAGE_USERS, buttons.OVERALL_STATS)
   }

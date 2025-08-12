@@ -5,13 +5,12 @@ export const onMyTeam = async ctx => {
   try {
     const text = await userService.getTeamInfoText(ctx.from.id)
     await ctx.reply(text)
-    const user = await userService.getUserByTelegramId(ctx.from.id)
-    if (user?.role === 'CAPTAIN') {
-      await MenuController.sendManageTeamMenu(ctx)
-    }
+    await MenuController.sendTeamOverviewMenu(ctx)
   } catch (e) {
     await ctx.reply(e.message)
   }
 }
 
-export const onManageTeam = async ctx => MenuController.sendManageTeamMenu(ctx) 
+export const onTeamOverview = async ctx => MenuController.sendTeamOverviewMenu(ctx)
+export const onTeamManage = async ctx => MenuController.sendTeamManageMenu(ctx)
+export const onTeamSettings = async ctx => MenuController.sendTeamSettingsMenu(ctx) 
