@@ -5,6 +5,7 @@ import { prisma } from '#prisma'
 import { Markup } from 'telegraf'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { MenuController } from '../../menu/menuController.js'
 
 const makeLabel = t => `#${t.id} — ${t.name} (${t.game})`
 
@@ -18,11 +19,13 @@ export const adminAnnounceTournamentScene = new Scenes.WizardScene(
     const isAdmin = await userService.isAdmin(ctx.from.id)
     if (!isAdmin) {
       await ctx.reply('Доступ только для администраторов')
+      await MenuController.sendMenu(ctx)
       return ctx.scene.leave()
     }
     const tournaments = await tournamentAdminService.listTournaments({ status: 'OPEN' })
     if (!tournaments.length) {
       await ctx.reply('Нет открытых турниров для анонса')
+      await MenuController.sendMenu(ctx)
       return ctx.scene.leave()
     }
 
@@ -47,6 +50,7 @@ export const adminAnnounceTournamentScene = new Scenes.WizardScene(
     const tournament = await tournamentAdminService.getTournamentById(id)
     if (!tournament) {
       await ctx.reply('Турнир не найден.')
+      await MenuController.sendMenu(ctx)
       return ctx.scene.leave()
     }
 
@@ -65,6 +69,7 @@ export const adminAnnounceTournamentScene = new Scenes.WizardScene(
 
     if (!captains.length) {
       await ctx.reply('Капитаны для анонса не найдены.')
+      await MenuController.sendMenu(ctx)
       return ctx.scene.leave()
     }
 
@@ -95,6 +100,7 @@ export const adminAnnounceTournamentScene = new Scenes.WizardScene(
     }
 
     await ctx.reply(`Анонс отправлен ${sent} капитанам`, Markup.removeKeyboard())
+    await MenuController.sendMenu(ctx)
     return ctx.scene.leave()
   }
 ) 

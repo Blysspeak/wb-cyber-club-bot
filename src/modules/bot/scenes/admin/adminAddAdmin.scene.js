@@ -1,6 +1,7 @@
 import { Scenes } from 'telegraf'
 import userService from '#userService'
 import { userAdminService } from '#adminService'
+import { MenuController } from '../../menu/menuController.js'
 
 export const adminAddAdminScene = new Scenes.WizardScene(
   'adminAddAdmin',
@@ -8,6 +9,7 @@ export const adminAddAdminScene = new Scenes.WizardScene(
     const isAdmin = await userService.isAdmin(ctx.from.id)
     if (!isAdmin) {
       await ctx.reply('Доступ только для администраторов')
+      await MenuController.sendMenu(ctx)
       return ctx.scene.leave()
     }
     await ctx.reply('Введите Telegram ID или @username пользователя для назначения админом:')
@@ -37,6 +39,7 @@ export const adminAddAdminScene = new Scenes.WizardScene(
     } catch (e) {
       await ctx.reply(`Ошибка: ${e.message || 'не удалось назначить администратора'}`)
     }
+    await MenuController.sendMenu(ctx)
     return ctx.scene.leave()
   }
 ) 

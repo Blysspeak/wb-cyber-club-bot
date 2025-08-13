@@ -1,6 +1,7 @@
 import { Scenes, Markup } from 'telegraf'
 import userService from '#userService'
 import { tournamentAdminService } from '#adminService'
+import { MenuController } from '../../menu/menuController.js'
 
 const escapeHtml = s => String(s)
   .replaceAll('&', '&amp;')
@@ -50,12 +51,14 @@ adminPendingApplicationsScene.enter(async ctx => {
   const isAdmin = await userService.isAdmin(ctx.from.id)
   if (!isAdmin) {
     await ctx.reply('Доступ только для администраторов')
+    await MenuController.sendMenu(ctx)
     return ctx.scene.leave()
   }
 
   const apps = await tournamentAdminService.getPendingApplications()
   if (!apps.length) {
     await ctx.reply('Заявок на модерации нет')
+    await MenuController.sendMenu(ctx)
     return ctx.scene.leave()
   }
 
@@ -70,5 +73,6 @@ adminPendingApplicationsScene.enter(async ctx => {
     await ctx.reply(text, { reply_markup: kb.reply_markup, parse_mode: 'HTML', disable_web_page_preview: true })
   }
 
+  await MenuController.sendMenu(ctx)
   return ctx.scene.leave()
 }) 

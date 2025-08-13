@@ -3,6 +3,7 @@ import { z } from 'zod'
 import userService from '#userService'
 import { tournamentAdminService } from '#adminService'
 import { downloadTelegramPhoto, saveBufferAsImage } from '#utils'
+import { MenuController } from '../../menu/menuController.js'
 
 const schema = z.object({
   name: z.string().min(3).max(200),
@@ -18,6 +19,7 @@ steps.push(async ctx => {
   const isAdmin = await userService.isAdmin(ctx.from.id)
   if (!isAdmin) {
     await ctx.reply('Доступ только для администраторов')
+    await MenuController.sendMenu(ctx)
     return ctx.scene.leave()
   }
   await ctx.reply('Введите название турнира (3-200 символов):')
@@ -93,6 +95,7 @@ steps.push(async ctx => {
     } catch (e) {
       await ctx.reply('Ошибка при создании турнира. Проверьте данные и попробуйте снова.')
     }
+    await MenuController.sendMenu(ctx)
     return ctx.scene.leave()
   }
 
@@ -112,6 +115,7 @@ steps.push(async ctx => {
   } catch (e) {
     await ctx.reply('Не удалось сохранить изображение. Турнир не создан. Повторите процесс.')
   }
+  await MenuController.sendMenu(ctx)
   return ctx.scene.leave()
 })
 
