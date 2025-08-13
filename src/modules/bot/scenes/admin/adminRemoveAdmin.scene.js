@@ -1,6 +1,7 @@
 import { Scenes } from 'telegraf'
 import userService from '#userService'
 import { userAdminService } from '#adminService'
+import { MenuController } from '../../menu/menuController.js'
 
 export const adminRemoveAdminScene = new Scenes.WizardScene(
   'adminRemoveAdmin',
@@ -8,6 +9,7 @@ export const adminRemoveAdminScene = new Scenes.WizardScene(
     const isAdmin = await userService.isAdmin(ctx.from.id)
     if (!isAdmin) {
       await ctx.reply('Доступ только для администраторов')
+      await MenuController.sendMenu(ctx)
       return ctx.scene.leave()
     }
     await ctx.reply('Введите Telegram ID или @username администратора для удаления:')
@@ -34,6 +36,7 @@ export const adminRemoveAdminScene = new Scenes.WizardScene(
     } catch (e) {
       await ctx.reply(`Ошибка: ${e.message || 'не удалось удалить администратора'}`)
     }
+    await MenuController.sendMenu(ctx)
     return ctx.scene.leave()
   }
 ) 
