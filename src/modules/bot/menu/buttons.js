@@ -16,14 +16,13 @@ export const buttons = {
   MY_TOURNAMENTS: '🏆 Мои турниры',
 
   // Admin specific
-  MANAGE_TOURNAMENTS: '🏆 Управление турнинами',
-  MANAGE_USERS: '👥 Управление пользователями',
+  ADMIN_TOURNAMENT_SETTINGS: '⚙️ Настройка турниров',
+  ADMIN_USER_MANAGEMENT: '👥 Управление пользователями',
   OVERALL_STATS: '📈 Общая статистика',
   ADMIN_CREATE_TOURNAMENT: '➕ Создать турнир',
   ADMIN_TOURNAMENTS_LIST: '📄 Список турниров',
   ADMIN_ANNOUNCE_TOURNAMENT: '📣 Анонс турнира',
   ADMIN_PENDING_APPS: '🗂️ Заявки на модерации',
-  ADMIN_MANAGE_ADMINS: '🛡️ Администраторы',
   ADMIN_ADD_ADMIN: '➕ Добавить администратора',
   ADMIN_REMOVE_ADMIN: '➖ Удалить администратора',
 
