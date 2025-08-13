@@ -1,7 +1,7 @@
 import { Scenes } from 'telegraf'
 import userService from '#userService'
 import { tournamentAdminService } from '#adminService'
-import { prisma } from '../../../../services/db/prisma.js'
+import { prisma } from '#prisma'
 import { Markup } from 'telegraf'
 import path from 'path'
 import { fileURLToPath } from 'url'

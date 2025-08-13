@@ -1,4 +1,4 @@
-import { prisma } from '../prisma.js'
+import { prisma } from '#prisma'
 import { getUserTeam } from './user.team.js'
 import { cacheDel } from '#cache'
 

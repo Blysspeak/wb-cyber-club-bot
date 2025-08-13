@@ -1,4 +1,4 @@
-import { prisma } from '../prisma.js'
+import { prisma } from '#prisma'
 import { getUserByTelegramId } from './user.read.js'
 import { cacheDel } from '#cache'
 

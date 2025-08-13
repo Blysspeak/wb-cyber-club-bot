@@ -4,7 +4,7 @@ import { MenuController } from '../menu/menuController.js'
 import { Telegraf } from 'telegraf'
 import { applyForTournament } from '#userService'
 import { logger } from '#utils'
-import { prisma } from '../../../services/db/prisma.js'
+import { prisma } from '#prisma'
 
 export const registerInvitationActions = bot => {
   bot.action(/^invite:(accept|decline):(\d+)$/, async ctx => {

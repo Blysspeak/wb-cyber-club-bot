@@ -22,7 +22,7 @@ import {
   getTeamComposition
 } from './user.team.js'
 import { applyForTournament, getTeamApplications, getActiveTournaments } from './user.tournament.js'
-import { prisma } from '../../prisma.js'
+import { prisma } from '#prisma'
 
 class UserAdminService {
   async listAdmins() {

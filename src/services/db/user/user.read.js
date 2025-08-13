@@ -1,4 +1,4 @@
-import { prisma } from '../prisma.js'
+import { prisma } from '#prisma'
 import { cacheGet, cacheDel } from '#cache'
 
 export const getUserByTelegramId = async telegramId => {
