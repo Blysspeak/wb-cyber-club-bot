@@ -6,7 +6,7 @@ import { Markup } from 'telegraf'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { MenuController } from '../../menu/menuController.js'
-import { checkCommand } from './utils/scene.utils.js'
+import { checkCommand } from '../utils/scene.utils.js'
 
 const makeLabel = t => `#${t.id} — ${t.name} (${t.game})`
 

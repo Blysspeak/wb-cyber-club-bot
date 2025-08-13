@@ -4,7 +4,7 @@ import userService from '#userService'
 import { tournamentAdminService } from '#adminService'
 import { downloadTelegramPhoto, saveBufferAsImage } from '#utils'
 import { MenuController } from '../../menu/menuController.js'
-import { checkCommand } from './utils/scene.utils.js'
+import { checkCommand } from '../utils/scene.utils.js'
 
 const nameSchema = z.string().min(3).max(200)
 const descriptionSchema = z.string().min(10).max(2000)

@@ -3,7 +3,7 @@ import { z } from 'zod'
 import userService from '#userService'
 import { userAdminService } from '#adminService'
 import { MenuController } from '../../menu/menuController.js'
-import { checkCommand } from './utils/scene.utils.js'
+import { checkCommand } from '../utils/scene.utils.js'
 
 const adminInputSchema = z.string().min(1)
 
