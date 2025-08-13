@@ -47,21 +47,24 @@ export const setupBot = () => {
   bot.hears(buttons.TEAM_TOURNAMENTS, ctx => ctx.reply('Активные турниры — скоро'))
 
   // Admin Menu
+  bot.hears(buttons.ADMIN_TOURNAMENT_SETTINGS, async (ctx) => {
+    const isAdmin = await userService.isAdmin(ctx.from.id)
+    if (!isAdmin) return ctx.reply('Доступ только для администраторов')
+    return MenuController.sendTournamentsMenu(ctx)
+  })
+
+  bot.hears(buttons.ADMIN_USER_MANAGEMENT, async (ctx) => {
+    const isAdmin = await userService.isAdmin(ctx.from.id)
+    if (!isAdmin) return ctx.reply('Доступ только для администраторов')
+    return MenuController.sendUsersMenu(ctx)
+  })
+
   bot.hears(buttons.ADMIN_CREATE_TOURNAMENT, ctx => ctx.scene.enter('adminCreateTournament'))
   bot.hears(buttons.ADMIN_TOURNAMENTS_LIST, ctx => ctx.scene.enter('adminTournamentsList'))
   bot.hears(buttons.ADMIN_ANNOUNCE_TOURNAMENT, ctx => ctx.scene.enter('adminAnnounceTournament'))
   bot.hears(buttons.ADMIN_PENDING_APPS, ctx => ctx.scene.enter('adminPendingApplications'))
   bot.hears(buttons.ADMIN_ADD_ADMIN, ctx => ctx.scene.enter('adminAddAdmin'))
   bot.hears(buttons.ADMIN_REMOVE_ADMIN, ctx => ctx.scene.enter('adminRemoveAdmin'))
-
-  bot.hears(buttons.ADMIN_MANAGE_ADMINS, async ctx => {
-    const isAdmin = await userService.isAdmin(ctx.from.id)
-    if (!isAdmin) return ctx.reply('Доступ только для администраторов')
-    const admins = await userAdminService.listAdmins()
-    if (!admins.length) return ctx.reply('Администраторов пока нет')
-    const lines = admins.map(a => `• ${a.name || a.nickname || a.telegramUsername || a.id} (@${a.telegramUsername || '-'}) — ${a.telegramId}`)
-    return ctx.reply(['Список администраторов:', ...lines].join('\n'))
-  })
 
   bot.hears(buttons.MANAGE_USERS, ctx => ctx.reply('Управление пользователями — скоро'))
   bot.hears(buttons.OVERALL_STATS, ctx => ctx.reply('Общая статистика — скоро'))
@@ -71,8 +74,11 @@ export const setupBot = () => {
   bot.hears(buttons.BACK, async ctx => {
     const user = await userService.getUserByTelegramId(ctx.from.id)
     const state = ctx.session?.menuState
-    if (user?.role === 'ADMIN') {
-      return MenuController.sendAdminMenu(ctx)
+    if (user?.role === 'ADMIN' || user?.isSuper) {
+        if (state === 'ADMIN_TOURNAMENTS' || state === 'ADMIN_USERS') {
+            return MenuController.sendAdminMenu(ctx)
+        }
+        return MenuController.sendAdminMenu(ctx)
     }
     if (state === 'TEAM_MANAGE' || state === 'TEAM_SETTINGS') {
       return onTeamOverview(ctx)

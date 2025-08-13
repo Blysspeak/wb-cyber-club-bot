@@ -2,6 +2,8 @@ import { getTeamOverviewMenu, getTeamManageMenu, getTeamSettingsMenu } from './c
 import { getUserMenu } from './userMenu/userMenu.js'
 import userService from '#userService'
 import { getAdminMenu } from './adminMenu/adminMenu.js'
+import { getTournamentsMenu } from './adminMenu/tournamentsMenu.js'
+import { getUsersMenu } from './adminMenu/usersMenu.js'
 import { SUPERADMIN_IDS } from '#utils'
 
 const superSet = new Set(
@@ -29,6 +31,18 @@ export class MenuController {
     const menu = getUserMenu(user)
     ctx.session.menuState = 'MAIN'
     ctx.reply('Главное меню:', { reply_markup: menu.reply_markup })
+  }
+
+  static async sendTournamentsMenu(ctx) {
+    ctx.session.menuState = 'ADMIN_TOURNAMENTS'
+    const kb = getTournamentsMenu()
+    return ctx.reply('Настройка турниров:', { reply_markup: kb.reply_markup })
+  }
+
+  static async sendUsersMenu(ctx) {
+    ctx.session.menuState = 'ADMIN_USERS'
+    const kb = getUsersMenu()
+    return ctx.reply('Управление пользователями:', { reply_markup: kb.reply_markup })
   }
 
   static async sendTeamOverviewMenu(ctx) {
