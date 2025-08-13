@@ -13,7 +13,7 @@ export const applyForTournament = async (telegramId, tournamentId) => {
   const existingApplication = await prisma.tournamentApplication.findFirst({ where: { tournamentId, teamId: captainTeam.id } })
   if (existingApplication) throw new Error('Заявка на этот турнир уже подана')
 
-  if (captainTeam.members.length < 5) throw new Error('В команде должно быть минимум 5 игроков для участия в турнире')
+  if (captainTeam.members.length < 1) throw new Error('В команде должен быть минимум 1 игрок для участия в турнире')
 
   const app = await prisma.tournamentApplication.create({
     data: { tournamentId, teamId: captainTeam.id, status: 'PENDING' },
