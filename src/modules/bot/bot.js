@@ -73,18 +73,17 @@ export const setupBot = () => {
 
   // Back button
   bot.hears(buttons.BACK, async ctx => {
-    const user = await userService.getUserByTelegramId(ctx.from.id)
     const state = ctx.session?.menuState
-    if (user?.role === 'ADMIN' || user?.isSuper) {
-        if (state === 'ADMIN_TOURNAMENTS' || state === 'ADMIN_USERS') {
-            return MenuController.sendAdminMenu(ctx)
-        }
-        return MenuController.sendAdminMenu(ctx)
+
+    if (state === 'ADMIN_TOURNAMENTS' || state === 'ADMIN_USERS') {
+      return MenuController.sendAdminMenu(ctx)
     }
+
     if (state === 'TEAM_MANAGE' || state === 'TEAM_SETTINGS') {
       return onTeamOverview(ctx)
     }
-    return MenuController.sendMenu(ctx)
+    
+    return MenuController.forceSendUserMenu(ctx)
   })
 
   // Invite callbacks
