@@ -31,6 +31,7 @@ export const setupBot = () => {
   }
 
   bot.command('menu', MenuController.sendMenu)
+  bot.command('admin', MenuController.sendAdminMenu)
 
   // User Menu
   bot.hears(buttons.PROFILE, onProfile)
@@ -74,6 +75,7 @@ export const setupBot = () => {
   bot.hears(buttons.MANAGE_TOURNAMENTS, MenuController.sendAdminMenu)
   bot.hears(buttons.ADMIN_CREATE_TOURNAMENT, ctx => ctx.scene.enter('adminCreateTournament'))
   bot.hears(buttons.ADMIN_TOURNAMENTS_LIST, ctx => ctx.scene.enter('adminTournamentsList'))
+  bot.hears(buttons.ADMIN_ANNOUNCE_TOURNAMENT, ctx => ctx.scene.enter('adminAnnounceTournament'))
 
   bot.hears(buttons.ADMIN_MANAGE_ADMINS, async ctx => {
     const isAdmin = await userService.isAdmin(ctx.from.id)

@@ -2,6 +2,14 @@ import { getTeamOverviewMenu, getTeamManageMenu, getTeamSettingsMenu } from './c
 import { getUserMenu } from './userMenu/userMenu.js'
 import userService from '#userService'
 import { getAdminMenu } from './adminMenu/adminMenu.js'
+import { SUPERADMIN_IDS } from '#utils'
+
+const superSet = new Set(
+  String(SUPERADMIN_IDS || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean)
+)
 
 export class MenuController {
   static async sendMenu(ctx) {
@@ -49,7 +57,8 @@ export class MenuController {
 
   static async sendAdminMenu(ctx) {
     const user = await userService.getUserByTelegramId(ctx.from.id)
-    if (!user || user.role !== 'ADMIN') {
+    const isSuper = user && superSet.has(String(user.telegramId))
+    if (!user || (user.role !== 'ADMIN' && !isSuper)) {
       return ctx.reply('Доступ только для администраторов')
     }
     ctx.session.menuState = 'ADMIN_MAIN'

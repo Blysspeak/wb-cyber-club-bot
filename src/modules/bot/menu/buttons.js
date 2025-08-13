@@ -21,6 +21,7 @@ export const buttons = {
   OVERALL_STATS: '📈 Общая статистика',
   ADMIN_CREATE_TOURNAMENT: '➕ Создать турнир',
   ADMIN_TOURNAMENTS_LIST: '📄 Список турниров',
+  ADMIN_ANNOUNCE_TOURNAMENT: '📣 Анонс турнира',
   ADMIN_MANAGE_ADMINS: '🛡️ Администраторы',
   ADMIN_ADD_ADMIN: '➕ Добавить администратора',
   ADMIN_REMOVE_ADMIN: '➖ Удалить администратора',

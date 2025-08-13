@@ -13,6 +13,7 @@ import { adminCreateTournamentScene } from './scenes/admin/adminCreateTournament
 import { adminTournamentsListScene } from './scenes/admin/adminTournamentsList.scene.js'
 import { adminAddAdminScene } from './scenes/admin/adminAddAdmin.scene.js'
 import { adminRemoveAdminScene } from './scenes/admin/adminRemoveAdmin.scene.js'
+import { adminAnnounceTournamentScene } from './scenes/admin/adminAnnounceTournament.scene.js'
 
 class Bot {
   constructor(token) {
@@ -23,7 +24,7 @@ class Bot {
     this.bot.use(messageLogger)
     this.bot.use(session())
 
-    const stage = new Scenes.Stage([registerScene, createTeamScene, updateTeamScene, gamesScene, mlbbScene, invitePlayerScene, removePlayerScene, adminCreateTournamentScene, adminTournamentsListScene, adminAddAdminScene, adminRemoveAdminScene])
+    const stage = new Scenes.Stage([registerScene, createTeamScene, updateTeamScene, gamesScene, mlbbScene, invitePlayerScene, removePlayerScene, adminCreateTournamentScene, adminTournamentsListScene, adminAddAdminScene, adminRemoveAdminScene, adminAnnounceTournamentScene])
     this.bot.use(stage.middleware())
 
     this.bot.start(async ctx => {
