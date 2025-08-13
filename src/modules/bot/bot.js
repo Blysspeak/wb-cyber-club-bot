@@ -6,6 +6,8 @@ import { onMyTeam, onTeamOverview, onTeamManage, onTeamSettings, sendTeamRosterR
 import { onGames } from './handlers/games.handlers.js'
 import { logger } from '#utils'
 import { registerInvitationActions } from './handlers/invitation.handlers.js'
+import { userAdminService } from '#adminService'
+import userService from '#userService'
 
 export const setupBot = () => {
   const bot = createBot()
@@ -72,6 +74,18 @@ export const setupBot = () => {
   bot.hears(buttons.MANAGE_TOURNAMENTS, MenuController.sendAdminMenu)
   bot.hears(buttons.ADMIN_CREATE_TOURNAMENT, ctx => ctx.scene.enter('adminCreateTournament'))
   bot.hears(buttons.ADMIN_TOURNAMENTS_LIST, ctx => ctx.scene.enter('adminTournamentsList'))
+
+  bot.hears(buttons.ADMIN_MANAGE_ADMINS, async ctx => {
+    const isAdmin = await userService.isAdmin(ctx.from.id)
+    if (!isAdmin) return ctx.reply('Доступ только для администраторов')
+    const admins = await userAdminService.listAdmins()
+    if (!admins.length) return ctx.reply('Администраторов пока нет')
+    const lines = admins.map(a => `• ${a.name || a.nickname || a.telegramUsername || a.id} (@${a.telegramUsername || '-'}) — ${a.telegramId}`)
+    return ctx.reply(['Список администраторов:', ...lines].join('\n'))
+  })
+  bot.hears(buttons.ADMIN_ADD_ADMIN, ctx => ctx.scene.enter('adminAddAdmin'))
+  bot.hears(buttons.ADMIN_REMOVE_ADMIN, ctx => ctx.scene.enter('adminRemoveAdmin'))
+
   bot.hears(buttons.MANAGE_USERS, ctx => ctx.reply('Управление пользователями — скоро'))
   bot.hears(buttons.OVERALL_STATS, ctx => ctx.reply('Общая статистика — скоро'))
   bot.hears(buttons.MAIN_MENU, MenuController.sendMenu)

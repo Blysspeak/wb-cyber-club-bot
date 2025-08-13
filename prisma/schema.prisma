@@ -89,6 +89,8 @@ model Tournament {
   maxTeams        Int
   game            String           @default("MLBB") @db.VarChar(50)
   status          TournamentStatus @default(OPEN)
+  imageId         Int?
+  image           Image?           @relation(fields: [imageId], references: [id], onDelete: SetNull)
   applications    TournamentApplication[]
   teams           TeamTournament[]
   createdAt       DateTime         @default(now())
@@ -138,4 +140,20 @@ model TeamTournament {
 
   @@unique([teamId, tournamentId])
   @@map("TeamTournament")
+}
+
+// МОДЕЛЬ ИЗОБРАЖЕНИЙ
+model Image {
+  id           Int      @id @default(autoincrement())
+  uuid         String   @unique @db.VarChar(64)
+  relativePath String   @db.VarChar(512)
+  mimeType     String?  @db.VarChar(128)
+  size         Int?
+  category     String   @db.VarChar(32) // admin | user
+  type         String   @db.VarChar(32) // tournament | team | other
+  createdAt    DateTime @default(now())
+
+  tournaments  Tournament[]
+
+  @@map("Image")
 }

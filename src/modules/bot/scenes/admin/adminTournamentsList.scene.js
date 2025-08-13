@@ -15,7 +15,11 @@ adminTournamentsListScene.enter(async ctx => {
     await ctx.reply('Турниров пока нет')
     return ctx.scene.leave()
   }
-  const lines = tournaments.slice(0, 20).map(t => `#${t.id} • ${t.name} • ${t.game} • ${t.status} • команды: ${t._count?.teams ?? '—'}`)
-  await ctx.reply(['Список турниров:', ...lines].join('\n'))
+  const base = `${ctx?.request?.protocol || 'http'}://${ctx?.request?.host || 'localhost'}` // may be undefined in TG context, so omit
+  const lines = tournaments.slice(0, 20).map(t => {
+    const img = t.image?.relativePath ? `/` + t.image.relativePath.replace(/\\/g, '/') : ''
+    return `#${t.id} • ${t.name} • ${t.game} • ${t.status} • команды: ${t._count?.teams ?? '—'}${img ? `\nИзображение: ${img}` : ''}`
+  })
+  await ctx.reply(['Список турниров:', ...lines].join('\n\n'))
   return ctx.scene.leave()
 }) 

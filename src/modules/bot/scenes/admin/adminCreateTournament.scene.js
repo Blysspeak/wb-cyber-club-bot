@@ -2,6 +2,7 @@ import { Scenes } from 'telegraf'
 import { z } from 'zod'
 import userService from '#userService'
 import { tournamentAdminService } from '#adminService'
+import { downloadTelegramPhoto, saveBufferAsImage } from '#utils'
 
 const schema = z.object({
   name: z.string().min(3).max(200),
@@ -77,13 +78,39 @@ steps.push(async ctx => {
     return
   }
   ctx.wizard.state.form.game = 'MLBB'
+  await ctx.reply('Отправьте картинку турнира фото-сообщением')
+  return ctx.wizard.next()
+})
+
+steps.push(async ctx => {
+  // Accept either photo or '-' to skip
+  const maybeSkip = ctx.message?.text?.trim()
+  if (maybeSkip === '-') {
+    try {
+      const data = schema.parse(ctx.wizard.state.form)
+      const created = await tournamentAdminService.createTournament(data)
+      await ctx.reply(`Турнир создан без картинки: #${created.id} — ${created.name}`)
+    } catch (e) {
+      await ctx.reply('Ошибка при создании турнира. Проверьте данные и попробуйте снова.')
+    }
+    return ctx.scene.leave()
+  }
+
+  const photos = ctx.message?.photo
+  if (!photos || !Array.isArray(photos) || photos.length === 0) {
+    await ctx.reply('Пришлите фото-сообщением изображение турнира:')
+    return
+  }
 
   try {
+    const best = photos[photos.length - 1]
+    const { buffer, mimeType } = await downloadTelegramPhoto(ctx, best.file_id)
+    const saved = await saveBufferAsImage({ buffer, category: 'admin', type: 'tournament', mimeType })
     const data = schema.parse(ctx.wizard.state.form)
-    const created = await tournamentAdminService.createTournament(data)
-    await ctx.reply(`Турнир создан: #${created.id} — ${created.name}`)
+    const { tournament } = await tournamentAdminService.createTournamentWithImage(data, saved)
+    await ctx.reply(`Турнир создан: #${tournament.id} — ${tournament.name}`)
   } catch (e) {
-    await ctx.reply('Ошибка при создании турнира. Проверьте данные и попробуйте снова.')
+    await ctx.reply('Не удалось сохранить изображение. Турнир не создан. Повторите процесс.')
   }
   return ctx.scene.leave()
 })
