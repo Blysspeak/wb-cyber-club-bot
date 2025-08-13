@@ -1,5 +1,6 @@
 import { tournamentAdminService } from '#adminService'
 import userService from '#userService'
+import { logger } from '#utils'
 
 export const registerAdminModerationActions = bot => {
   bot.action(/^app_approve:(\d+)$/, async ctx => {
@@ -11,6 +12,20 @@ export const registerAdminModerationActions = bot => {
       await ctx.answerCbQuery('Одобрено')
       await ctx.editMessageReplyMarkup({ inline_keyboard: [] }).catch(() => {})
       await ctx.reply(`✅ Заявка одобрена: команда ${app.team.name} в турнире ${app.tournament.name}`)
+
+      // Notify captain
+      const captainId = app.team?.captainId
+      if (captainId) {
+        const captain = await userService.getUserById(captainId)
+        if (captain?.telegramId) {
+          const notifyText = [
+            `✅ Ваша заявка одобрена!`,
+            `Команда: ${app.team.name}`,
+            `Турнир: ${app.tournament.name}`
+          ].join('\n')
+          await ctx.telegram.sendMessage(String(captain.telegramId), notifyText)
+        }
+      }
     } catch (e) {
       await ctx.answerCbQuery('Ошибка', { show_alert: true })
     }
@@ -51,6 +66,7 @@ export const registerAdminModerationActions = bot => {
         }
       }
     } catch (e) {
+      logger.error('Error rejecting application:', e)
       await ctx.reply('Ошибка отклонения заявки')
     }
   })
