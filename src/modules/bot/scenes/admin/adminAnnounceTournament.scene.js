@@ -6,6 +6,7 @@ import { Markup } from 'telegraf'
 import path from 'path'
 import { fileURLToPath } from 'url'
 import { MenuController } from '../../menu/menuController.js'
+import { checkCommand } from './utils/scene.utils.js'
 
 const makeLabel = t => `#${t.id} — ${t.name} (${t.game})`
 
@@ -38,6 +39,7 @@ export const adminAnnounceTournamentScene = new Scenes.WizardScene(
 
     return ctx.wizard.next()
   },
+  checkCommand,
   async ctx => {
     const text = ctx.message?.text?.trim()
     const map = ctx.wizard.state.openMap || {}
