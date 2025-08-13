@@ -4,6 +4,7 @@ import { MenuController } from '../menu/menuController.js'
 import { Telegraf } from 'telegraf'
 import { applyForTournament } from '#userService'
 import { logger } from '#utils'
+import { prisma } from '../../../services/db/prisma.js'
 
 export const registerInvitationActions = bot => {
   bot.action(/^invite:(accept|decline):(\d+)$/, async ctx => {
@@ -46,7 +47,31 @@ export const registerInvitationActions = bot => {
       const app = await applyForTournament(ctx.from.id, id)
       await ctx.answerCbQuery('Заявка отправлена')
       await ctx.editMessageReplyMarkup({ inline_keyboard: [] })
-      await ctx.reply(`Заявка на турнир #${id} отправлена. Статус: PENDING`)
+      const tournamentName = app.tournament?.name || `#${id}`
+      await ctx.reply(`Заявка на турнир ${tournamentName} отправлена. Ожидайте решение администрации.`)
+
+      // Notify all admins about the new application
+      try {
+        const admins = await prisma.user.findMany({ where: { role: 'ADMIN' }, select: { telegramId: true } })
+        const teamName = app.team?.name || '—'
+        const captain = app.team?.captain
+        const captainLine = captain
+          ? `${captain.nickname || captain.name || captain.telegramUsername || captain.id}`
+          : '-'
+        const notifyText = [
+          '📝 Новая заявка на турнир',
+          `Турнир: ${tournamentName}`,
+          `Команда: ${teamName}`,
+          `Капитан: ${captainLine}`
+        ].join('\n')
+        for (const a of admins) {
+          try {
+            await ctx.telegram.sendMessage(String(a.telegramId), notifyText)
+          } catch {}
+        }
+      } catch (e) {
+        logger.warn('Failed to notify admins about application', e)
+      }
     } catch (e) {
       await ctx.answerCbQuery('Не удалось отправить заявку', { show_alert: true })
       await ctx.reply(`Ошибка: ${e.message || 'не удалось отправить заявку'}`)
