@@ -31,7 +31,7 @@ class Bot {
         }
         return MenuController.sendMenu(ctx)
       } catch (err) {
-        logger.error('Ошибка при /start', err)
+        logger.error('Error during /start', err)
         return ctx.reply('Произошла ошибка. Попробуйте позже.')
       }
     })
