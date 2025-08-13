@@ -1,5 +1,5 @@
 import { prisma } from '../prisma.js'
-import { cacheGet } from '#cache'
+import { cacheGet, cacheDel } from '#cache'
 
 export const getUserByTelegramId = async telegramId => {
   return cacheGet(['user', 'byTg', String(telegramId)], async () => {
@@ -22,6 +22,10 @@ export const getUserByTelegramId = async telegramId => {
       }
     })
   }, 60)
+}
+
+export const getUserById = async id => {
+  return prisma.user.findUnique({ where: { id: Number(id) } })
 }
 
 export const getUserStats = async telegramId => {
