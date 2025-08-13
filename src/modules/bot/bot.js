@@ -17,7 +17,7 @@ export const setupBot = () => {
     return null
   }
 
-  bot.command('menu', MenuController.sendMenu)
+  bot.command('menu', MenuController.forceSendUserMenu)
   bot.command('admin', MenuController.sendAdminMenu)
 
   // User Menu
