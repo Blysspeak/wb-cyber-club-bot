@@ -25,15 +25,31 @@ export const registerAdminModerationActions = bot => {
     await ctx.reply('Укажите причину отклонения одной строкой:')
   })
 
-  bot.on('text', async ctx => {
-    const pendingId = ctx.session?.__rejectAppId
-    if (!pendingId) return
+  bot.on('text', async (ctx, next) => {
+    if (!ctx.session || !ctx.session.__rejectAppId) return next()
+    const pendingId = ctx.session.__rejectAppId
     const reason = ctx.message.text?.trim()
     if (!reason) return
     delete ctx.session.__rejectAppId
+
     try {
       const app = await tournamentAdminService.rejectApplication(pendingId, reason)
       await ctx.reply(`❌ Заявка отклонена: команда ${app.team.name} в турнире ${app.tournament.name}\nПричина: ${reason}`)
+
+      // Notify captain
+      const captainId = app.team?.captainId
+      if (captainId) {
+        const captain = await userService.getUserById(captainId)
+        if (captain?.telegramId) {
+          const notifyText = [
+            `❌ Ваша заявка отклонена`,
+            `Команда: ${app.team.name}`,
+            `Турнир: ${app.tournament.name}`,
+            `Причина: ${reason}`
+          ].join('\n')
+          await ctx.telegram.sendMessage(String(captain.telegramId), notifyText)
+        }
+      }
     } catch (e) {
       await ctx.reply('Ошибка отклонения заявки')
     }
