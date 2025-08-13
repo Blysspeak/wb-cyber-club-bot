@@ -2,6 +2,15 @@ import { Scenes } from 'telegraf'
 import userService from '#userService'
 import { tournamentAdminService } from '#adminService'
 import { prisma } from '../../../../services/db/prisma.js'
+import { Markup } from 'telegraf'
+import path from 'path'
+import { fileURLToPath } from 'url'
+
+const makeLabel = t => `#${t.id} — ${t.name} (${t.game})`
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const projectRoot = path.resolve(__dirname, '../../../../..')
 
 export const adminAnnounceTournamentScene = new Scenes.WizardScene(
   'adminAnnounceTournament',
@@ -16,24 +25,31 @@ export const adminAnnounceTournamentScene = new Scenes.WizardScene(
       await ctx.reply('Нет открытых турниров для анонса')
       return ctx.scene.leave()
     }
-    const lines = tournaments.slice(0, 20).map(t => `#${t.id} — ${t.name} (${t.game})`)
-    await ctx.reply(['Выберите турнир для анонса. Введите ID:', ...lines].join('\n'))
+
+    const labels = tournaments.slice(0, 20).map(makeLabel)
+    ctx.wizard.state.openMap = Object.fromEntries(labels.map((label, idx) => [label, tournaments[idx].id]))
+
+    await ctx.reply('Выберите турнир для анонса:', {
+      reply_markup: Markup.keyboard(labels, { columns: 2 }).resize().reply_markup
+    })
+
     return ctx.wizard.next()
   },
   async ctx => {
-    const raw = ctx.message?.text?.trim()
-    const id = Number(raw)
-    if (!Number.isInteger(id) || id <= 0) {
-      await ctx.reply('Введите корректный числовой ID турнира:')
-      return
-    }
-    const tournament = await tournamentAdminService.getTournamentById(id)
-    if (!tournament) {
-      await ctx.reply('Турнир не найден. Введите другой ID:')
+    const text = ctx.message?.text?.trim()
+    const map = ctx.wizard.state.openMap || {}
+    const id = map[text]
+    if (!id) {
+      await ctx.reply('Пожалуйста, выберите турнир кнопкой с клавиатуры:')
       return
     }
 
-    // Find all captains with the same game in their games list
+    const tournament = await tournamentAdminService.getTournamentById(id)
+    if (!tournament) {
+      await ctx.reply('Турнир не найден.')
+      return ctx.scene.leave()
+    }
+
     const captains = await prisma.user.findMany({
       where: {
         role: 'CAPTAIN',
@@ -52,7 +68,7 @@ export const adminAnnounceTournamentScene = new Scenes.WizardScene(
       return ctx.scene.leave()
     }
 
-    const message = [
+    const caption = [
       '🏆 НОВЫЙ ТУРНИР!',
       `Название: ${tournament.name}`,
       `Игра: ${tournament.game}`,
@@ -60,12 +76,25 @@ export const adminAnnounceTournamentScene = new Scenes.WizardScene(
       tournament.description ? `📝 Описание: ${tournament.description}` : null
     ].filter(Boolean).join('\n')
 
+    const keyboard = Markup.inlineKeyboard([
+      [Markup.button.callback('📝 Подать заявку', `t_apply:${tournament.id}`)],
+      [Markup.button.callback('🙈 Игнорировать', `t_ignore:${tournament.id}`)]
+    ])
+
+    let sent = 0
     for (const c of captains) {
       try {
-        await ctx.telegram.sendMessage(String(c.telegramId), message)
+        if (tournament.image?.relativePath) {
+          const absolute = path.resolve(projectRoot, tournament.image.relativePath)
+          await ctx.telegram.sendPhoto(String(c.telegramId), { source: absolute }, { caption, reply_markup: keyboard.reply_markup })
+        } else {
+          await ctx.telegram.sendMessage(String(c.telegramId), caption, { reply_markup: keyboard.reply_markup })
+        }
+        sent += 1
       } catch {}
     }
-    await ctx.reply(`Анонс отправлен ${captains.length} капитанам`)
+
+    await ctx.reply(`Анонс отправлен ${sent} капитанам`, Markup.removeKeyboard())
     return ctx.scene.leave()
   }
 ) 

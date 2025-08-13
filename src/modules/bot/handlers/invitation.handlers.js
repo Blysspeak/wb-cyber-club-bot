@@ -1,6 +1,9 @@
 import userService from '#userService'
 import redis from '#cache'
 import { MenuController } from '../menu/menuController.js'
+import { Telegraf } from 'telegraf'
+import { applyForTournament } from '#userService'
+import { logger } from '#utils'
 
 export const registerInvitationActions = bot => {
   bot.action(/^invite:(accept|decline):(\d+)$/, async ctx => {
@@ -34,6 +37,28 @@ export const registerInvitationActions = bot => {
       }
     } catch (e) {
       await ctx.answerCbQuery('Ошибка обработки приглашения', { show_alert: true }).catch(() => {})
+    }
+  })
+
+  bot.action(/^t_apply:(\d+)$/, async ctx => {
+    const id = Number(ctx.match[1])
+    try {
+      const app = await applyForTournament(ctx.from.id, id)
+      await ctx.answerCbQuery('Заявка отправлена')
+      await ctx.editMessageReplyMarkup({ inline_keyboard: [] })
+      await ctx.reply(`Заявка на турнир #${id} отправлена. Статус: PENDING`)
+    } catch (e) {
+      await ctx.answerCbQuery('Не удалось отправить заявку', { show_alert: true })
+      await ctx.reply(`Ошибка: ${e.message || 'не удалось отправить заявку'}`)
+    }
+  })
+
+  bot.action(/^t_ignore:(\d+)$/, async ctx => {
+    try {
+      await ctx.answerCbQuery('Окей, скрываю')
+      await ctx.editMessageReplyMarkup({ inline_keyboard: [] })
+    } catch (e) {
+      logger.warn('Ignore click failed', e)
     }
   })
 } 
