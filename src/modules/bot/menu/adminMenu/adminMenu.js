@@ -3,7 +3,8 @@ import { buttons } from '#buttons'
 
 export const getAdminMenu = () => {
   const menu = [
-    buttons.MANAGE_TOURNAMENTS,
+    buttons.ADMIN_CREATE_TOURNAMENT,
+    buttons.ADMIN_TOURNAMENTS_LIST,
     buttons.MANAGE_USERS,
     buttons.OVERALL_STATS,
     buttons.MAIN_MENU

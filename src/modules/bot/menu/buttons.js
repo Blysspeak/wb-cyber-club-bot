@@ -19,6 +19,8 @@ export const buttons = {
   MANAGE_TOURNAMENTS: '🏆 Управление турнинами',
   MANAGE_USERS: '👥 Управление пользователями',
   OVERALL_STATS: '📈 Общая статистика',
+  ADMIN_CREATE_TOURNAMENT: '➕ Создать турнир',
+  ADMIN_TOURNAMENTS_LIST: '📄 Список турниров',
 
   // Manage Team submenu
   TEAM_VIEW: '👥 Состав команды',

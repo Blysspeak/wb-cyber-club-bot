@@ -1,0 +1,1 @@
+export { tournamentAdminService } from './tournament/tournament.admin.service.js' 

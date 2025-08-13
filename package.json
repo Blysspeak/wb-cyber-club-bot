@@ -11,7 +11,8 @@
     "#utils": "./src/modules/utils/index.js",
     "#buttons": "./src/modules/bot/menu/buttons.js",
     "#userService": "./src/services/db/user/index.js",
-    "#cache": "./src/services/cache/index.js"
+    "#cache": "./src/services/cache/index.js",
+    "#adminService": "./src/services/db/admin/index.js"
   },
   "dependencies": {
     "@prisma/client": "^6.14.0",

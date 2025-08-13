@@ -69,7 +69,9 @@ export const setupBot = () => {
   })
 
   // Admin Menu
-  bot.hears(buttons.MANAGE_TOURNAMENTS, ctx => ctx.reply('Управление турнинами — скоро'))
+  bot.hears(buttons.MANAGE_TOURNAMENTS, MenuController.sendAdminMenu)
+  bot.hears(buttons.ADMIN_CREATE_TOURNAMENT, ctx => ctx.scene.enter('adminCreateTournament'))
+  bot.hears(buttons.ADMIN_TOURNAMENTS_LIST, ctx => ctx.scene.enter('adminTournamentsList'))
   bot.hears(buttons.MANAGE_USERS, ctx => ctx.reply('Управление пользователями — скоро'))
   bot.hears(buttons.OVERALL_STATS, ctx => ctx.reply('Общая статистика — скоро'))
   bot.hears(buttons.MAIN_MENU, MenuController.sendMenu)

@@ -1,6 +1,7 @@
 import { getTeamOverviewMenu, getTeamManageMenu, getTeamSettingsMenu } from './captainMenu/captainMenu.js'
 import { getUserMenu } from './userMenu/userMenu.js'
 import userService from '#userService'
+import { getAdminMenu } from './adminMenu/adminMenu.js'
 
 export class MenuController {
   static async sendMenu(ctx) {
@@ -44,5 +45,15 @@ export class MenuController {
     ctx.session.menuState = 'TEAM_SETTINGS'
     const kb = getTeamSettingsMenu()
     return ctx.reply('Настройки команды:', { reply_markup: kb.reply_markup })
+  }
+
+  static async sendAdminMenu(ctx) {
+    const user = await userService.getUserByTelegramId(ctx.from.id)
+    if (!user || user.role !== 'ADMIN') {
+      return ctx.reply('Доступ только для администраторов')
+    }
+    ctx.session.menuState = 'ADMIN_MAIN'
+    const kb = getAdminMenu()
+    return ctx.reply('Админ-панель:', { reply_markup: kb.reply_markup })
   }
 }
