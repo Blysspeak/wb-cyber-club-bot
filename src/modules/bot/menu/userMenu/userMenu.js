@@ -20,10 +20,6 @@ export const getUserMenu = user => {
 
   menu.push(buttons.GAMES)
 
-  const isSuperAdmin = superSet.has(String(user.telegramId))
-  if (user.role === 'ADMIN' || isSuperAdmin) {
-    menu.push(buttons.MANAGE_TOURNAMENTS, buttons.MANAGE_USERS, buttons.OVERALL_STATS)
-  }
 
   menu.push(buttons.HELP)
 

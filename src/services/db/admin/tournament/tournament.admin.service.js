@@ -67,6 +67,34 @@ class TournamentAdminService {
   async deleteTournament(id) {
     return prisma.tournament.delete({ where: { id } })
   }
+
+  async getPendingApplications() {
+    return prisma.tournamentApplication.findMany({
+      where: { status: 'PENDING' },
+      orderBy: { createdAt: 'asc' },
+      include: {
+        tournament: true,
+        team: {
+          include: {
+            captain: { select: { id: true, telegramId: true, telegramUsername: true, name: true, nickname: true, wildberriesId: true, mlbbId: true, mlbbServer: true } },
+            members: { select: { id: true, telegramId: true, telegramUsername: true, name: true, nickname: true, wildberriesId: true, mlbbId: true, mlbbServer: true } }
+          }
+        }
+      }
+    })
+  }
+
+  async approveApplication(applicationId) {
+    return prisma.$transaction(async tx => {
+      const app = await tx.tournamentApplication.update({ where: { id: applicationId }, data: { status: 'APPROVED' }, include: { tournament: true, team: true } })
+      await tx.teamTournament.create({ data: { teamId: app.teamId, tournamentId: app.tournamentId } })
+      return app
+    })
+  }
+
+  async rejectApplication(applicationId, reason) {
+    return prisma.tournamentApplication.update({ where: { id: applicationId }, data: { status: 'REJECTED', rejectionReason: reason }, include: { tournament: true, team: true } })
+  }
 }
 
 export const tournamentAdminService = new TournamentAdminService() 

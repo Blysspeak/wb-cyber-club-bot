@@ -8,26 +8,13 @@ import { logger } from '#utils'
 import { registerInvitationActions } from './handlers/invitation.handlers.js'
 import { userAdminService } from '#adminService'
 import userService from '#userService'
+import { registerAdminModerationActions } from './handlers/admin.handlers.js'
 
 export const setupBot = () => {
   const bot = createBot()
 
   if (!bot) {
     return null
-  }
-
-  const safeHears = (trigger, handler) => {
-    const isValidTrigger =
-      typeof trigger === 'string' ||
-      trigger instanceof RegExp ||
-      typeof trigger === 'function' ||
-      (Array.isArray(trigger) && trigger.every(t => typeof t === 'string' || t instanceof RegExp || typeof t === 'function'))
-
-    if (!isValidTrigger) {
-      logger.error('Invalid trigger passed to hears', { trigger })
-      return
-    }
-    bot.hears(trigger, handler)
   }
 
   bot.command('menu', MenuController.sendMenu)
@@ -43,39 +30,29 @@ export const setupBot = () => {
   bot.hears(buttons.HELP, ctx => ctx.reply('Помощь — скоро'))
 
   // Team nested menus
-  safeHears(buttons.TEAM_VIEW, async ctx => {
+  bot.hears(buttons.TEAM_VIEW, async ctx => {
     await sendTeamRosterRich(ctx)
     return onTeamOverview(ctx)
   })
-  safeHears(buttons.TEAM_MANAGE, onTeamManage)
-  safeHears(buttons.TEAM_SETTINGS, onTeamSettings)
-  safeHears(buttons.TEAM_INVITE, ctx => ctx.scene.enter('invitePlayer'))
-  safeHears(buttons.TEAM_REMOVE, ctx => ctx.scene.enter('removePlayer'))
-  safeHears(buttons.TEAM_DELETE, ctx => ctx.reply('Удаление команды — скоро'))
-  safeHears(buttons.TEAM_UPDATE, ctx => ctx.scene.enter('updateTeam'))
-  safeHears(buttons.TEAM_INVITATIONS, ctx => ctx.reply('Приглашения — скоро'))
-  safeHears(buttons.TEAM_STATS, ctx => ctx.reply('Статистика команды — скоро'))
-  safeHears(buttons.TEAM_APPLY, ctx => ctx.reply('Заявка на турнир — скоро'))
-  safeHears(buttons.TEAM_APPS, ctx => ctx.reply('Заявки команды — скоро'))
-  safeHears(buttons.TEAM_TOURNAMENTS, ctx => ctx.reply('Активные турниры — скоро'))
-
-  // Invite callbacks
-  registerInvitationActions(bot)
-
-  // Contextual Back
-  bot.hears(buttons.BACK, async ctx => {
-    const state = ctx.session?.menuState
-    if (state === 'TEAM_MANAGE' || state === 'TEAM_SETTINGS') {
-      return onTeamOverview(ctx)
-    }
-    return MenuController.sendMenu(ctx)
-  })
+  bot.hears(buttons.TEAM_MANAGE, onTeamManage)
+  bot.hears(buttons.TEAM_SETTINGS, onTeamSettings)
+  bot.hears(buttons.TEAM_INVITE, ctx => ctx.scene.enter('invitePlayer'))
+  bot.hears(buttons.TEAM_REMOVE, ctx => ctx.scene.enter('removePlayer'))
+  bot.hears(buttons.TEAM_DELETE, ctx => ctx.reply('Удаление команды — скоро'))
+  bot.hears(buttons.TEAM_UPDATE, ctx => ctx.scene.enter('updateTeam'))
+  bot.hears(buttons.TEAM_INVITATIONS, ctx => ctx.reply('Приглашения — скоро'))
+  bot.hears(buttons.TEAM_STATS, ctx => ctx.reply('Статистика команды — скоро'))
+  bot.hears(buttons.TEAM_APPLY, ctx => ctx.reply('Заявка на турнир — скоро'))
+  bot.hears(buttons.TEAM_APPS, ctx => ctx.reply('Заявки команды — скоро'))
+  bot.hears(buttons.TEAM_TOURNAMENTS, ctx => ctx.reply('Активные турниры — скоро'))
 
   // Admin Menu
-  bot.hears(buttons.MANAGE_TOURNAMENTS, MenuController.sendAdminMenu)
   bot.hears(buttons.ADMIN_CREATE_TOURNAMENT, ctx => ctx.scene.enter('adminCreateTournament'))
   bot.hears(buttons.ADMIN_TOURNAMENTS_LIST, ctx => ctx.scene.enter('adminTournamentsList'))
   bot.hears(buttons.ADMIN_ANNOUNCE_TOURNAMENT, ctx => ctx.scene.enter('adminAnnounceTournament'))
+  bot.hears(buttons.ADMIN_PENDING_APPS, ctx => ctx.scene.enter('adminPendingApplications'))
+  bot.hears(buttons.ADMIN_ADD_ADMIN, ctx => ctx.scene.enter('adminAddAdmin'))
+  bot.hears(buttons.ADMIN_REMOVE_ADMIN, ctx => ctx.scene.enter('adminRemoveAdmin'))
 
   bot.hears(buttons.ADMIN_MANAGE_ADMINS, async ctx => {
     const isAdmin = await userService.isAdmin(ctx.from.id)
@@ -85,12 +62,27 @@ export const setupBot = () => {
     const lines = admins.map(a => `• ${a.name || a.nickname || a.telegramUsername || a.id} (@${a.telegramUsername || '-'}) — ${a.telegramId}`)
     return ctx.reply(['Список администраторов:', ...lines].join('\n'))
   })
-  bot.hears(buttons.ADMIN_ADD_ADMIN, ctx => ctx.scene.enter('adminAddAdmin'))
-  bot.hears(buttons.ADMIN_REMOVE_ADMIN, ctx => ctx.scene.enter('adminRemoveAdmin'))
 
   bot.hears(buttons.MANAGE_USERS, ctx => ctx.reply('Управление пользователями — скоро'))
   bot.hears(buttons.OVERALL_STATS, ctx => ctx.reply('Общая статистика — скоро'))
   bot.hears(buttons.MAIN_MENU, MenuController.sendMenu)
+
+  // Back button
+  bot.hears(buttons.BACK, async ctx => {
+    const user = await userService.getUserByTelegramId(ctx.from.id)
+    const state = ctx.session?.menuState
+    if (user?.role === 'ADMIN') {
+      return MenuController.sendAdminMenu(ctx)
+    }
+    if (state === 'TEAM_MANAGE' || state === 'TEAM_SETTINGS') {
+      return onTeamOverview(ctx)
+    }
+    return MenuController.sendMenu(ctx)
+  })
+
+  // Invite callbacks
+  registerInvitationActions(bot)
+  registerAdminModerationActions(bot)
 
   return bot
 }

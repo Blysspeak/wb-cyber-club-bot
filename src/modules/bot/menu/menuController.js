@@ -19,6 +19,13 @@ export class MenuController {
       return ctx.reply('Сначала нужно зарегистрироваться. Введите /start')
     }
 
+    const isSuper = superSet.has(String(user.telegramId))
+    if (user.role === 'ADMIN' || isSuper) {
+      ctx.session.menuState = 'ADMIN_MAIN'
+      const kb = getAdminMenu()
+      return ctx.reply('Админ-панель:', { reply_markup: kb.reply_markup })
+    }
+
     const menu = getUserMenu(user)
     ctx.session.menuState = 'MAIN'
     ctx.reply('Главное меню:', { reply_markup: menu.reply_markup })

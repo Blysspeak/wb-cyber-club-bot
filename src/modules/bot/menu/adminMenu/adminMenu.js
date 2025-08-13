@@ -6,6 +6,7 @@ export const getAdminMenu = () => {
     buttons.ADMIN_CREATE_TOURNAMENT,
     buttons.ADMIN_TOURNAMENTS_LIST,
     buttons.ADMIN_ANNOUNCE_TOURNAMENT,
+    buttons.ADMIN_PENDING_APPS,
     buttons.ADMIN_MANAGE_ADMINS,
     buttons.ADMIN_ADD_ADMIN,
     buttons.ADMIN_REMOVE_ADMIN,
