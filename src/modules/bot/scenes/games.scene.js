@@ -57,7 +57,7 @@ export const gamesScene = new Scenes.WizardScene(
     }
 
     if (text === '⬅️ Назад') {
-      await MenuController.sendMenu(ctx)
+      await MenuController.forceSendUserMenu(ctx)
       return ctx.scene.leave()
     }
 
