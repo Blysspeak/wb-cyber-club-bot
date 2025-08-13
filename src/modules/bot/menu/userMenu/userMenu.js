@@ -1,5 +1,13 @@
 import { buttons } from '#buttons'
 import { Markup } from 'telegraf'
+import { SUPERADMIN_IDS } from '#utils'
+
+const superSet = new Set(
+  String(SUPERADMIN_IDS || '')
+    .split(',')
+    .map(s => s.trim())
+    .filter(Boolean)
+)
 
 export const getUserMenu = user => {
   const menu = [buttons.PROFILE, buttons.STATS]
@@ -12,7 +20,8 @@ export const getUserMenu = user => {
 
   menu.push(buttons.GAMES)
 
-  if (user.role === 'ADMIN') {
+  const isSuperAdmin = superSet.has(String(user.telegramId))
+  if (user.role === 'ADMIN' || isSuperAdmin) {
     menu.push(buttons.MANAGE_TOURNAMENTS, buttons.MANAGE_USERS, buttons.OVERALL_STATS)
   }
 

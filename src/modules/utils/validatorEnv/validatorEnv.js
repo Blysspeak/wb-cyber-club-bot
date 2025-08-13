@@ -93,7 +93,10 @@ const envSchema = z.object({
 
 	// Telegram Bot (optional to allow server-only startup)
 	BOT_TOKEN: z.string().min(1).optional(),
-	PORT: z.coerce.number().int().positive().optional().default(9001)
+	PORT: z.coerce.number().int().positive().optional().default(9001),
+
+	// Super admin bootstrap (csv of telegram ids)
+	SUPERADMIN_IDS: z.string().optional()
 })
 
 let validatedEnv
@@ -121,7 +124,8 @@ export const {
 	REDIS_PASSWORD,
 	REDIS_DB,
 	BOT_TOKEN,
-	PORT
+	PORT,
+	SUPERADMIN_IDS
 } = validatedEnv
 
 export const env = validatedEnv
