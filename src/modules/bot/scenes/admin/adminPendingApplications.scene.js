@@ -21,10 +21,11 @@ const userLink = u => {
 }
 
 const formatMemberLine = u => {
-  const wb = u.wildberriesId ? `WB: <b>${escapeHtml(u.wildberriesId)}</b>` : 'WB: -'
-  const mlbbId = u.mlbbId ? `MLBB: <b>${escapeHtml(u.mlbbId)}</b>` : 'MLBB: -'
-  const mlbbSrv = u.mlbbServer ? `Srv: <b>${escapeHtml(u.mlbbServer)}</b>` : 'Srv: -'
-  return `• ${userLink(u)} — ${wb}; ${mlbbId}; ${mlbbSrv}`
+  const name = userLink(u)
+  const tg = u.telegramId ? `| TG ID: <code>${String(u.telegramId)}</code>` : ''
+  const wb = u.wildberriesId ? `WB: <code>${escapeHtml(u.wildberriesId)}</code>` : ''
+  const mlbb = u.mlbbId && u.mlbbServer ? `MLBB: <code>${escapeHtml(u.mlbbId)} [${escapeHtml(u.mlbbServer)}]</code>` : ''
+  return `• ${name} ${tg}\n  ${[wb, mlbb].filter(Boolean).join(' | ')}`
 }
 
 const formatTeamInfoHtml = app => {
@@ -32,15 +33,15 @@ const formatTeamInfoHtml = app => {
   const captain = team.captain
   const members = team.members || []
 
-  const title = `🛡️ Команда: <b>${escapeHtml(team.name)}</b> (${escapeHtml(team.acronym)})`
-  const tournament = `🏆 Турнир: <b>${escapeHtml(app.tournament.name)}</b>`
+  const title = `🔔 <b>Заявка на участие в турнире</b>\n<i>${escapeHtml(app.tournament.name)}</i> от команды <i>${escapeHtml(team.name)}</i>`
+  const separator = '-----------------------------------'
   const captainLine = captain
-    ? `👨‍✈️ Капитан: ${userLink(captain)}`
-    : '👨‍✈️ Капитан: -'
-  const membersTitle = '👥 Состав:'
-  const membersLines = members.map(formatMemberLine).join('\n')
+    ? `👨‍✈️ <b>Капитан</b>:\n${formatMemberLine(captain)}`
+    : '👨‍✈️ <b>Капитан</b>: -'
+  const membersTitle = '👥 <b>Состав</b>:'
+  const membersLines = members.filter(m => m.id !== captain?.id).map(formatMemberLine).join('\n\n')
 
-  return [title, tournament, captainLine, membersTitle, membersLines].filter(Boolean).join('\n')
+  return [title, separator, captainLine, separator, membersTitle, membersLines].filter(Boolean).join('\n')
 }
 
 export const adminPendingApplicationsScene = new Scenes.BaseScene('adminPendingApplications')
