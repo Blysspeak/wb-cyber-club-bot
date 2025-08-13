@@ -5,7 +5,7 @@ export const getUsersMenu = () => {
   const menu = [
     buttons.ADMIN_ADD_ADMIN,
     buttons.ADMIN_REMOVE_ADMIN,
-    buttons.MANAGE_USERS,
+    buttons.ADMIN_LIST_USERS,
     buttons.OVERALL_STATS,
     buttons.BACK
   ]

@@ -66,8 +66,10 @@ export const setupBot = () => {
   bot.hears(buttons.ADMIN_ADD_ADMIN, ctx => ctx.scene.enter('adminAddAdmin'))
   bot.hears(buttons.ADMIN_REMOVE_ADMIN, ctx => ctx.scene.enter('adminRemoveAdmin'))
 
+  bot.hears(buttons.ADMIN_LIST_USERS, ctx => ctx.reply('Список пользователей — скоро'))
   bot.hears(buttons.OVERALL_STATS, ctx => ctx.reply('Общая статистика — скоро'))
   bot.hears(buttons.MAIN_MENU, MenuController.sendMenu)
+  bot.hears(buttons.EXIT_TO_USER_MENU, MenuController.forceSendUserMenu)
 
   // Back button
   bot.hears(buttons.BACK, async ctx => {

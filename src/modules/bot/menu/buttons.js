@@ -18,6 +18,7 @@ export const buttons = {
   // Admin specific
   ADMIN_TOURNAMENT_SETTINGS: '⚙️ Настройка турниров',
   ADMIN_USER_MANAGEMENT: '👥 Управление пользователями',
+  ADMIN_LIST_USERS: '📋 Список пользователей',
   OVERALL_STATS: '📈 Общая статистика',
   ADMIN_CREATE_TOURNAMENT: '➕ Создать турнир',
   ADMIN_TOURNAMENTS_LIST: '📄 Список турниров',
@@ -25,6 +26,7 @@ export const buttons = {
   ADMIN_PENDING_APPS: '🗂️ Заявки на модерации',
   ADMIN_ADD_ADMIN: '➕ Добавить администратора',
   ADMIN_REMOVE_ADMIN: '➖ Удалить администратора',
+  EXIT_TO_USER_MENU: '🚪 Выйти из админ-панели',
 
   // Manage Team submenu
   TEAM_VIEW: '👥 Состав команды',

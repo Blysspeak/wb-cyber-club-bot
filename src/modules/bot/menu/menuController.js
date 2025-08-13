@@ -33,6 +33,16 @@ export class MenuController {
     ctx.reply('Главное меню:', { reply_markup: menu.reply_markup })
   }
 
+  static async forceSendUserMenu(ctx) {
+    const user = await userService.getUserByTelegramId(ctx.from.id)
+    if (!user) {
+      return ctx.reply('Сначала нужно зарегистрироваться. Введите /start')
+    }
+    const menu = getUserMenu(user)
+    ctx.session.menuState = 'MAIN'
+    ctx.reply('Главное меню:', { reply_markup: menu.reply_markup })
+  }
+
   static async sendTournamentsMenu(ctx) {
     ctx.session.menuState = 'ADMIN_TOURNAMENTS'
     const kb = getTournamentsMenu()
