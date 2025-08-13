@@ -1,5 +1,5 @@
 import { tournamentAdminService } from '#adminService'
-import userService from '#userService'
+import userService, { getUserById } from '#userService'
 import { logger } from '#utils'
 
 export const registerAdminModerationActions = bot => {
@@ -16,7 +16,7 @@ export const registerAdminModerationActions = bot => {
       // Notify captain
       const captainId = app.team?.captainId
       if (captainId) {
-        const captain = await userService.getUserById(captainId)
+        const captain = await getUserById(captainId)
         if (captain?.telegramId) {
           const notifyText = [
             `✅ Ваша заявка одобрена!`,
@@ -54,7 +54,7 @@ export const registerAdminModerationActions = bot => {
       // Notify captain
       const captainId = app.team?.captainId
       if (captainId) {
-        const captain = await userService.getUserById(captainId)
+        const captain = await getUserById(captainId)
         if (captain?.telegramId) {
           const notifyText = [
             `❌ Ваша заявка отклонена`,

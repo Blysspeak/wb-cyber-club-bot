@@ -1,7 +1,7 @@
 import userService from '#userService'
 import redis from '#cache'
 import { MenuController } from '../menu/menuController.js'
-import { Telegraf } from 'telegraf'
+import { Telegraf, Markup } from 'telegraf'
 import { applyForTournament } from '#userService'
 import { logger } from '#utils'
 import { prisma } from '#prisma'
@@ -64,9 +64,15 @@ export const registerInvitationActions = bot => {
           `Команда: ${teamName}`,
           `Капитан: ${captainLine}`
         ].join('\n')
+        const kb = Markup.inlineKeyboard([
+          [
+            Markup.button.callback('✅ Одобрить', `app_approve:${app.id}`),
+            Markup.button.callback('❌ Отклонить', `app_reject:${app.id}`)
+          ]
+        ])
         for (const a of admins) {
           try {
-            await ctx.telegram.sendMessage(String(a.telegramId), notifyText)
+            await ctx.telegram.sendMessage(String(a.telegramId), notifyText, kb)
           } catch {}
         }
       } catch (e) {

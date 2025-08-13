@@ -11,9 +11,21 @@ export const applyForTournament = async (telegramId, tournamentId) => {
   if (tournament.status !== 'OPEN') throw new Error('Турнир закрыт для заявок')
 
   const existingApplication = await prisma.tournamentApplication.findFirst({ where: { tournamentId, teamId: captainTeam.id } })
-  if (existingApplication) throw new Error('Заявка на этот турнир уже подана')
+  if (existingApplication && existingApplication.status !== 'REJECTED') {
+    throw new Error('Заявка на этот турнир уже подана')
+  }
 
   if (captainTeam.members.length < 1) throw new Error('В команде должен быть минимум 1 игрок для участия в турнире')
+
+  if (existingApplication && existingApplication.status === 'REJECTED') {
+    const app = await prisma.tournamentApplication.update({
+      where: { id: existingApplication.id },
+      data: { status: 'PENDING', rejectionReason: null },
+      include: { tournament: true, team: { include: { captain: true, members: true } } }
+    })
+    await cacheDel(['team', 'byUserTg', String(telegramId)])
+    return app
+  }
 
   const app = await prisma.tournamentApplication.create({
     data: { tournamentId, teamId: captainTeam.id, status: 'PENDING' },
